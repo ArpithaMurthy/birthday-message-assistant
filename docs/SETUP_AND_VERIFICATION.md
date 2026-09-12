@@ -36,7 +36,14 @@ Add Flutter's `bin` directory to the user `PATH`.
 
 ### 2. Clone and validate
 
-Clone the GitHub repository, open its folder, then run:
+Clone the private GitHub repository while signed in as its owner:
+
+```text
+git clone https://github.com/ArpithaMurthy/birthday-message-assistant.git
+cd birthday-message-assistant
+```
+
+Open that folder, then run:
 
 ```text
 flutter doctor -v
