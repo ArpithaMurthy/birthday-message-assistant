@@ -1,28 +1,35 @@
-import 'package:moments_remembered/models/birthday.dart';
+import 'package:moments_remembered/models/occasion.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MessageService {
-  String draft(Birthday birthday, MessageTone tone) {
-    final firstName = birthday.name.trim().split(RegExp(r'\s+')).first;
-    final memory = birthday.notes.trim();
+  String draft(Occasion occasion, MessageTone tone) {
+    final recipient = occasion.personName.trim().isEmpty ? '' : ', ${occasion.personName.trim().split(RegExp(r'\s+')).first}';
+    final memory = occasion.notes.trim();
     final suffix = memory.isEmpty ? '' : ' $memory';
+    final greeting = switch (occasion.type) {
+      OccasionType.birthday => 'Happy birthday$recipient',
+      OccasionType.anniversary => 'Happy anniversary$recipient',
+      OccasionType.newYear => 'Happy New Year$recipient',
+      OccasionType.holiday => 'Warm wishes for ${occasion.title}$recipient',
+      OccasionType.custom => 'Thinking of you for ${occasion.title}$recipient',
+    };
     return switch (tone) {
-      MessageTone.warm => 'Happy birthday, $firstName! I hope your day is full of joy and that the year ahead brings you many wonderful moments.$suffix',
-      MessageTone.playful => 'Happy birthday, $firstName! 🎉 Wishing you plenty of cake, laughter, and reasons to celebrate today.$suffix',
-      MessageTone.short => 'Happy birthday, $firstName! Wishing you a wonderful day and a happy year ahead. 🎂',
-      MessageTone.formal => 'Wishing you a very happy birthday, $firstName. May the coming year bring you happiness, good health, and success.',
+      MessageTone.warm => '$greeting! I hope this special occasion brings joy and many wonderful moments.$suffix',
+      MessageTone.playful => '$greeting! 🎉 Hope it is filled with laughter, happiness, and plenty of reasons to celebrate.$suffix',
+      MessageTone.short => '$greeting! Wishing you a wonderful day. ✨',
+      MessageTone.formal => '$greeting. Wishing you happiness, good health, and every success.',
     };
   }
 
-  Future<bool> openComposer(Birthday birthday, String message) async {
-    if (birthday.channel == MessageChannel.share) {
+  Future<bool> openComposer(Occasion occasion, String message) async {
+    if (occasion.channel == MessageChannel.share) {
       await SharePlus.instance.share(ShareParams(text: message));
       return true;
     }
-    final phone = birthday.phoneNumber.replaceAll(RegExp(r'[^+\d]'), '');
+    final phone = occasion.phoneNumber.replaceAll(RegExp(r'[^+\d]'), '');
     final encoded = Uri.encodeComponent(message);
-    final candidates = switch (birthday.channel) {
+    final candidates = switch (occasion.channel) {
       MessageChannel.sms => [Uri.parse('sms:$phone?body=$encoded')],
       MessageChannel.whatsapp => [
           Uri.parse('whatsapp://send?phone=$phone&text=$encoded'),

@@ -1,6 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:moments_remembered/models/birthday.dart';
+import 'package:moments_remembered/models/occasion.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -26,52 +26,52 @@ class NotificationService {
     return androidGranted ?? iosGranted ?? false;
   }
 
-  Future<void> rescheduleAll(List<Birthday> birthdays) async {
+  Future<void> rescheduleAll(List<Occasion> occasions) async {
     await _plugin.cancelAll();
     final now = DateTime.now();
     final reminders = <_Reminder>[];
-    for (final birthday in birthdays) {
-      final occurrence = birthday.nextOccurrence(now);
-      for (final daysBefore in birthday.reminderDays) {
+    for (final occasion in occasions) {
+      final occurrence = occasion.nextOccurrence(now);
+      for (final daysBefore in occasion.reminderDays) {
         final date = occurrence.subtract(Duration(days: daysBefore));
         final scheduled = tz.TZDateTime(tz.local, date.year, date.month, date.day, 9);
         if (!scheduled.isAfter(tz.TZDateTime.now(tz.local))) continue;
-        reminders.add(_Reminder(birthday: birthday, occurrence: occurrence, daysBefore: daysBefore, scheduled: scheduled));
+        reminders.add(_Reminder(occasion: occasion, occurrence: occurrence, daysBefore: daysBefore, scheduled: scheduled));
       }
     }
     reminders.sort((left, right) => left.scheduled.compareTo(right.scheduled));
     for (final reminder in reminders.take(60)) {
-        final birthday = reminder.birthday;
+        final occasion = reminder.occasion;
         final occurrence = reminder.occurrence;
         final daysBefore = reminder.daysBefore;
-        final id = Object.hash(birthday.id, occurrence.year, daysBefore) & 0x7fffffff;
+        final id = Object.hash(occasion.id, occurrence.year, daysBefore) & 0x7fffffff;
         final timing = daysBefore == 0 ? 'today' : daysBefore == 1 ? 'tomorrow' : 'in $daysBefore days';
         await _plugin.zonedSchedule(
           id,
-          '${birthday.name}\'s birthday is $timing',
+          '${occasion.calendarTitle} is $timing',
           'Take a moment to prepare something thoughtful.',
           reminder.scheduled,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'birthday_reminders',
-              'Birthday reminders',
-              channelDescription: 'Reminders for upcoming birthdays',
+              'occasion_reminders',
+              'Occasion reminders',
+              channelDescription: 'Reminders for upcoming important occasions',
               importance: Importance.high,
               priority: Priority.high,
             ),
             iOS: DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          payload: birthday.id,
+          payload: occasion.id,
         );
     }
   }
 }
 
 class _Reminder {
-  const _Reminder({required this.birthday, required this.occurrence, required this.daysBefore, required this.scheduled});
+  const _Reminder({required this.occasion, required this.occurrence, required this.daysBefore, required this.scheduled});
 
-  final Birthday birthday;
+  final Occasion occasion;
   final DateTime occurrence;
   final int daysBefore;
   final tz.TZDateTime scheduled;

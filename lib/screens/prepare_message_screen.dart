@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:moments_remembered/models/birthday.dart';
+import 'package:moments_remembered/models/occasion.dart';
 import 'package:moments_remembered/services/message_service.dart';
 
 class PrepareMessageScreen extends StatefulWidget {
-  const PrepareMessageScreen({required this.birthday, super.key});
+  const PrepareMessageScreen({required this.occasion, super.key});
 
-  final Birthday birthday;
+  final Occasion occasion;
 
   @override
   State<PrepareMessageScreen> createState() => _PrepareMessageScreenState();
@@ -20,7 +20,7 @@ class _PrepareMessageScreenState extends State<PrepareMessageScreen> {
   @override
   void initState() {
     super.initState();
-    _message = TextEditingController(text: _service.draft(widget.birthday, _tone));
+    _message = TextEditingController(text: _service.draft(widget.occasion, _tone));
   }
 
   @override
@@ -32,12 +32,12 @@ class _PrepareMessageScreenState extends State<PrepareMessageScreen> {
   void _changeTone(MessageTone tone) {
     setState(() {
       _tone = tone;
-      _message.text = _service.draft(widget.birthday, tone);
+      _message.text = _service.draft(widget.occasion, tone);
     });
   }
 
   Future<void> _open() async {
-    final opened = await _service.openComposer(widget.birthday, _message.text.trim());
+    final opened = await _service.openComposer(widget.occasion, _message.text.trim());
     if (!mounted) return;
     setState(() => _openedComposer = opened);
     if (!opened) {
@@ -46,13 +46,13 @@ class _PrepareMessageScreenState extends State<PrepareMessageScreen> {
   }
 
   void _complete() {
-    Navigator.pop(context, widget.birthday.copyWith(lastHandledYear: widget.birthday.nextOccurrence().year));
+    Navigator.pop(context, widget.occasion.copyWith(lastHandledYear: widget.occasion.nextOccurrence().year));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('For ${widget.birthday.name}')),
+      appBar: AppBar(title: Text(widget.occasion.calendarTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),

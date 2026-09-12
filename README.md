@@ -1,6 +1,6 @@
 # Moments Remembered
 
-A private, local-first birthday reminder and message companion for Android and iPhone.
+A private, local-first occasion reminder and message companion for Android, iPhone, and the web.
 
 ## Product promise
 
@@ -10,19 +10,24 @@ The app deliberately does **not** send messages automatically. It prepares an ed
 
 ## What the personal MVP includes
 
-1. Manually add a person, birthday, relationship, channel, and optional personal note.
-2. See the next birthday and a human-friendly countdown.
-3. Receive local reminders 7 days, 1 day, and the morning of the birthday—even when the app is closed.
+1. Add birthdays, anniversaries, New Year, holidays, or custom occasions.
+2. See the next occurrence and a human-friendly countdown.
+3. Receive local reminders 7 days, 1 day, and the morning of the occasion—even when the app is closed.
 4. Start from warm, playful, short, or formal message templates.
 5. Edit every word and open a messaging app for approval.
-6. Mark the birthday handled to prevent accidental duplicate follow-up.
+6. Mark the occasion handled to prevent accidental duplicate follow-up.
 7. Keep all personal data on the phone. There is no account, server, advertising SDK, analytics SDK, or contact upload.
+8. Export a recurring `.ics` calendar containing reminders for Apple Calendar, Google Calendar, or Outlook.
+
+## Use it without installing an app
+
+Open [web-lite/index.html](web-lite/index.html) in a browser or deploy that folder as a static website. It stores occasions only in that browser and can download a recurring calendar file. Importing the file into the phone's calendar provides closed-browser reminders without an App Store download or notification server.
 
 ## Stage-by-stage plan
 
 ### Stage 1 — validate personally (implemented)
 
-Use manual birthday entry for several real birthdays. Validate reminder reliability, message quality, and whether the workflow saves time.
+Use manual entry for several real occasions. Validate reminder reliability, message quality, and whether the workflow saves time.
 
 ### Stage 2 — small private test
 
@@ -30,7 +35,7 @@ Invite 5–10 trusted Android users through a closed Play test. Improve onboardi
 
 ### Stage 3 — first store release
 
-Prepare the privacy policy, screenshots, icon, Play data-safety form, signed Android App Bundle, and store description. Keep the app free and ad-free while measuring whether users return and complete birthday actions.
+Prepare the privacy policy, screenshots, icon, Play data-safety form, signed Android App Bundle, and store description. Keep the app free and ad-free while measuring whether users return and complete occasion actions.
 
 ### Stage 4 — sustainable monetization
 
@@ -75,4 +80,4 @@ After platform generation on macOS:
 
 ## Privacy
 
-See [docs/PRIVACY.md](docs/PRIVACY.md). Birthday details and message drafts remain local. Store listing privacy declarations must be reviewed whenever a contact, analytics, advertising, AI, backup, or commerce feature is added.
+See [docs/PRIVACY.md](docs/PRIVACY.md). Occasion details and message drafts remain local. Store listing privacy declarations must be reviewed whenever a contact, analytics, advertising, AI, backup, or commerce feature is added.

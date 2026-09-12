@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#b11f4b">
+  <title>Moments Remembered</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--cp-bg); color: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    .shell { width: min(720px, 100%); margin: auto; padding: 24px 16px 80px; }
+    header { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 24px; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 6px; font-size: clamp(1.75rem, 8vw, 2.5rem); letter-spacing: -0.04em; }
+    .muted { color: var(--cp-text-muted); }
+    .card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 20px; box-shadow: var(--cp-shadow); }
+    form { display: grid; gap: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display: grid; gap: 6px; font-size: 0.875rem; color: var(--cp-text-muted); }
+    input, select, textarea { width: 100%; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; padding: 11px 12px; background: var(--cp-bg-elevated); color: var(--cp-text); }
+    textarea { min-height: 76px; resize: vertical; }
+    button { border: 0; border-radius: 0.625rem; padding: 11px 16px; cursor: pointer; font-weight: 600; }
+    .primary { background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .primary:hover { background: var(--cp-accent-hover); }
+    .secondary { color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .danger { color: var(--cp-danger); background: var(--cp-surface-soft); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 28px 0 12px; }
+    .section-head h2 { margin: 0; }
+    #occasions { display: grid; gap: 12px; }
+    .occasion { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 12px; }
+    .date { text-align: center; border-radius: 0.625rem; padding: 7px 4px; background: var(--cp-accent-soft); color: var(--cp-accent); font-weight: 700; }
+    .date small { display: block; font-size: 0.65rem; text-transform: uppercase; }
+    .occasion h3 { margin: 0 0 3px; }
+    .occasion p { margin: 0; font-size: 0.875rem; }
+    .empty { text-align: center; padding: 36px 20px; }
+    .privacy { margin-top: 20px; font-size: 0.8125rem; text-align: center; color: var(--cp-text-soft); }
+    dialog { width: min(640px, calc(100% - 24px)); border: 1px solid var(--cp-border); border-radius: 16px; padding: 0; background: var(--cp-surface); color: var(--cp-text); box-shadow: var(--cp-shadow); }
+    dialog::backdrop { background: var(--cp-overlay); }
+    dialog .card { box-shadow: none; border: 0; }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .occasion { grid-template-columns: 48px 1fr; } .occasion .danger { grid-column: 2; justify-self: start; } header { display: block; } header .secondary { margin-top: 12px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div><h1>Moments Remembered</h1><p class="muted">Remember important moments. Prepare something thoughtful. Follow through on time.</p></div>
+      <button class="secondary" id="export" type="button">Export calendar</button>
+    </header>
+
+    <section class="card">
+      <form id="occasion-form">
+        <div class="grid">
+          <label>Occasion type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option></select></label>
+          <label>Date<input id="date" type="date" required></label>
+        </div>
+        <label>Occasion title<input id="title" value="Birthday" required maxlength="80"></label>
+        <div class="grid">
+          <label>Person or group (optional)<input id="person" placeholder="Maya, Mum and Dad, Team…" maxlength="80"></label>
+          <label>Relationship (optional)<input id="relationship" placeholder="Friend, sister, colleague…" maxlength="80"></label>
+        </div>
+        <label>Personal note (optional)<textarea id="notes" placeholder="A memory or detail to mention"></textarea></label>
+        <button class="primary" type="submit">Save occasion</button>
+      </form>
+    </section>
+
+    <div class="section-head"><h2>Coming up</h2><span class="muted" id="count"></span></div>
+    <section id="occasions"></section>
+    <p class="privacy">Private by default: data stays in this browser. Calendar export lets Apple Calendar, Google Calendar, or Outlook deliver reminders without installing an app.</p>
+  </main>
+
+  <dialog id="message-dialog">
+    <section class="card">
+      <h2>Prepare message</h2>
+      <p class="muted">Edit every word. Nothing is sent automatically.</p>
+      <label>Your message<textarea id="message"></textarea></label>
+      <div class="actions" style="margin-top:16px">
+        <button class="primary" id="share-message" type="button">Share message</button>
+        <button class="secondary" id="close-message" type="button">Close</button>
+      </div>
+    </section>
+  </dialog>
+
+  <script>
+    const key = 'moments-remembered.occasions.v1';
+    const $ = (id) => document.getElementById(id);
+    let occasions = JSON.parse(localStorage.getItem(key) || '[]');
+    let activeMessage = '';
+    const type = $('type');
+    const titles = { Birthday: 'Birthday', Anniversary: 'Anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion' };
+    type.addEventListener('change', () => { $('title').value = titles[type.value]; if (type.value === 'New Year') $('date').value = `${new Date().getFullYear()}-01-01`; });
+
+    function nextDate(value) {
+      const source = new Date(`${value}T12:00:00`), now = new Date();
+      let candidate = new Date(now.getFullYear(), source.getMonth(), source.getDate(), 12);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+      if (candidate < today) candidate.setFullYear(candidate.getFullYear() + 1);
+      return candidate;
+    }
+    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
+    function draft(item) {
+      const first = item.person.trim().split(/\s+/)[0];
+      const recipient = first ? `, ${first}` : '';
+      const greeting = item.type === 'Birthday' ? `Happy birthday${recipient}` : item.type === 'Anniversary' ? `Happy anniversary${recipient}` : item.type === 'New Year' ? `Happy New Year${recipient}` : item.type === 'Holiday' ? `Warm wishes for ${item.title}${recipient}` : `Thinking of you for ${item.title}${recipient}`;
+      return `${greeting}! I hope this special occasion brings joy and many wonderful moments.${item.notes ? ` ${item.notes}` : ''}`;
+    }
+    function render() {
+      occasions.sort((a, b) => nextDate(a.date) - nextDate(b.date));
+      $('count').textContent = `${occasions.length} saved`;
+      $('export').disabled = occasions.length === 0;
+      $('occasions').innerHTML = occasions.length ? occasions.map((item) => {
+        const date = nextDate(item.date), month = date.toLocaleString(undefined, { month: 'short' }), days = Math.round((date - new Date(new Date().setHours(0,0,0,0))) / 86400000);
+        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare message</button></div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
+      }).join('') : '<div class="card empty"><h3>No occasions yet</h3><p class="muted">Add a birthday, anniversary, holiday, or custom moment above.</p></div>';
+    }
+    $('occasion-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      occasions.push({ id: crypto.randomUUID(), type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), notes: $('notes').value.trim() });
+      localStorage.setItem(key, JSON.stringify(occasions)); event.target.reset(); type.value = 'Birthday'; $('title').value = 'Birthday'; render();
+    });
+    $('occasions').addEventListener('click', (event) => {
+      const id = event.target.dataset.id; if (!id) return;
+      if (event.target.classList.contains('remove')) { occasions = occasions.filter((item) => item.id !== id); localStorage.setItem(key, JSON.stringify(occasions)); render(); }
+      if (event.target.classList.contains('prepare')) { const item = occasions.find((value) => value.id === id); activeMessage = draft(item); $('message').value = activeMessage; $('message-dialog').showModal(); }
+    });
+    $('close-message').addEventListener('click', () => $('message-dialog').close());
+    $('share-message').addEventListener('click', async () => { const text = $('message').value; if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); $('share-message').textContent = 'Copied'; } });
+    function esc(value) { return value.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+    $('export').addEventListener('click', () => {
+      const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+      const events = occasions.map((item) => { const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`; return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`,'RRULE:FREQ=YEARLY',`SUMMARY:${esc(summary)}`,'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM','BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM','END:VEVENT'].join('\r\n'); }).join('\r\n');
+      const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Moments Remembered//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR\r\n`, url = URL.createObjectURL(new Blob([content], { type: 'text/calendar' })), link = document.createElement('a'); link.href = url; link.download = 'moments-remembered.ics'; link.click(); URL.revokeObjectURL(url);
+    });
+    $('date').value = new Date().toISOString().slice(0,10); render();
+  </script>
+</body>
+</html>
