@@ -23,6 +23,12 @@ The app deliberately does **not** send messages automatically. It prepares an ed
 
 Open [web-lite/index.html](web-lite/index.html) in a browser or deploy that folder as a static website. It stores occasions only in that browser and can download a recurring calendar file. Importing the file into the phone's calendar provides closed-browser reminders without an App Store download or notification server.
 
+## Moving to another laptop
+
+Follow [docs/SETUP_AND_VERIFICATION.md](docs/SETUP_AND_VERIFICATION.md) for the complete clone, Android SDK, build, phone-testing, iPhone/Web Lite, and Docker workflow.
+
+Git preserves source code, not personal occasions. Mobile data stays on the phone and Web Lite data stays in that browser. Exporting a calendar provides a portable reminder snapshot; encrypted app backup/import remains future work.
+
 ## Stage-by-stage plan
 
 ### Stage 1 — validate personally (implemented)
@@ -47,17 +53,27 @@ Open this same repository on macOS, install Xcode and Flutter, run `flutter crea
 
 ## Development setup on Windows
 
-Flutter source code is present. Generate or refresh platform projects after Flutter and Android Studio are ready:
+After cloning the repository and installing Flutter and Android Studio:
 
 ```text
-flutter create --org com.arpithamurthy --project-name moments_remembered --platforms android,ios .
 flutter pub get
 flutter analyze
 flutter test
+flutter build apk --debug
 flutter run
 ```
 
-The first `flutter create` command preserves the `lib`, `test`, and project documentation while adding standard Android and iOS host projects.
+Android and iOS host projects are already versioned. Do not regenerate them during a normal laptop migration.
+
+## Optional Web Lite container
+
+Docker provides a repeatable local server for `web-lite/`, but is not needed for Flutter development and cannot provide native mobile notifications:
+
+```text
+docker compose up --build
+```
+
+Then open `http://localhost:8080`. Static hosting is preferable for a public deployment.
 
 ## Android configuration
 

@@ -2,9 +2,9 @@
 
 ## First four weeks
 
-Add at least ten real birthdays, including one within the next week. Keep a manual calendar reminder as a control until notification delivery is verified.
+Add at least ten real occasions, including one within the next week. Include birthdays, anniversaries, holidays, or custom moments. Keep a manual calendar reminder as a control until notification delivery is verified.
 
-For each birthday, note:
+For each occasion, note:
 
 - Did the 7-day reminder appear?
 - Did the 1-day reminder appear?
@@ -18,12 +18,14 @@ For each birthday, note:
 
 Before a public store release:
 
-- At least 8 of 10 testers add five birthdays.
+- At least 8 of 10 testers add five occasions.
 - At least 80% of scheduled test reminders appear within an acceptable window.
 - At least 60% of opened reminders lead to a prepared message.
 - No tester believes the app sends without approval.
 - Testers can delete their information without assistance.
-- No duplicate reminders remain after editing or deleting a birthday.
+- No duplicate reminders remain after editing or deleting an occasion.
+
+Use the detailed device and closed-app checks in [SETUP_AND_VERIFICATION.md](SETUP_AND_VERIFICATION.md) before inviting testers.
 
 ## Commerce signal
 

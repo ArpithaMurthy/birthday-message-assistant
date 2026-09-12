@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.vscode
+.dart_tool
+build
+coverage
+android
+ios
+test
+lib
+docs
+*.iml
+*.log
