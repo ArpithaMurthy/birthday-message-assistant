@@ -27,6 +27,8 @@ Open [web-lite/index.html](web-lite/index.html) in a browser or deploy that fold
 
 The repository includes a GitHub Pages workflow at `.github/workflows/deploy-web-lite.yml` that publishes only the static `web-lite/` folder. The deployed app stores each user's occasions in that user's browser `localStorage`; there is no server account, database, analytics SDK, or contact upload.
 
+Adding or importing occasions in Web Lite does **not** automatically add them to a calendar. The user must click **Export calendar** and import the downloaded `.ics` file into Apple Calendar, Google Calendar, or Outlook. Reminder delivery then depends on that calendar app and the user's device notification settings. If calendar notifications are disabled, the browser app cannot force a reminder.
+
 To deploy:
 
 1. Push the repository to GitHub.
@@ -41,6 +43,39 @@ https://ArpithaMurthy.github.io/birthday-message-assistant/
 ```
 
 If the repository stays private, confirm your GitHub plan and Pages visibility settings support public access. If you need a guaranteed public URL while keeping the repo private, deploy `web-lite/` to a static host such as Azure Static Web Apps, Netlify, Vercel, or Cloudflare Pages.
+
+## Add your people, occasions, and default messages
+
+Web Lite is login-free by design. Use **Import data** to load a local JSON or CSV file; the file is read in the browser and is not uploaded to a server. Use **Export data** to back up or move the same browser-local list to another device.
+
+JSON format:
+
+```json
+{
+  "schemaVersion": 1,
+  "occasions": [
+    {
+      "type": "Birthday",
+      "title": "Birthday",
+      "date": "2026-09-20",
+      "person": "Maya",
+      "relationship": "Friend",
+      "notes": "Mention the hiking trip.",
+      "defaultMessage": "Happy birthday, Maya! Hope your day is full of joy."
+    }
+  ]
+}
+```
+
+CSV format:
+
+```csv
+type,title,date,person,relationship,notes,default_message
+Birthday,Birthday,2026-09-20,Maya,Friend,Mention the hiking trip.,Happy birthday Maya!
+Anniversary,Wedding anniversary,2026-12-10,Ada and Sam,Family,,Happy anniversary Ada and Sam!
+```
+
+Dates must use `YYYY-MM-DD`. If `defaultMessage` or `default_message` is present, **Prepare message** starts from that exact text; otherwise the app generates a simple draft from the occasion type, person, and notes.
 
 ## Moving to another laptop
 
