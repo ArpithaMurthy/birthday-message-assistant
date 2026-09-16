@@ -174,9 +174,28 @@
       return candidate;
     }
     function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
+    function normalizeDate(value) {
+      const raw = String(value || '').trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const year = new Date().getFullYear();
+      const months = { jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8, sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11, dec: 12, december: 12 };
+      let match = raw.toLowerCase().match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?$/);
+      if (match && months[match[1]]) return formatDate(match[3] || year, months[match[1]], match[2]);
+      match = raw.toLowerCase().match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:,?\s*(\d{4}))?$/);
+      if (match && months[match[2]]) return formatDate(match[3] || year, months[match[2]], match[1]);
+      match = raw.match(/^(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?$/);
+      if (match) return formatDate(match[3] ? expandYear(match[3]) : year, match[1], match[2]);
+      return '';
+    }
+    function expandYear(value) { const year = Number(value); return year < 100 ? 2000 + year : year; }
+    function formatDate(year, month, day) {
+      const candidate = new Date(Number(year), Number(month) - 1, Number(day));
+      if (candidate.getFullYear() !== Number(year) || candidate.getMonth() !== Number(month) - 1 || candidate.getDate() !== Number(day)) return '';
+      return `${candidate.getFullYear()}-${String(candidate.getMonth() + 1).padStart(2, '0')}-${String(candidate.getDate()).padStart(2, '0')}`;
+    }
     function normalizeOccasions(values) {
       const list = Array.isArray(values) ? values : values.occasions || [];
-      return list.filter(Boolean).map((item) => ({ id: item.id || crypto.randomUUID(), type: item.type || 'Birthday', title: item.title || item.type || 'Birthday', date: item.date, person: item.person || item.personName || '', relationship: item.relationship || '', channel: item.channel || 'Share', phone: item.phone || item.phoneNumber || item.whatsapp || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' })).filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
+      return list.filter(Boolean).map((item) => ({ id: item.id || crypto.randomUUID(), type: item.type || 'Birthday', title: item.title || item.type || 'Birthday', date: normalizeDate(item.date), person: item.person || item.personName || '', relationship: item.relationship || '', channel: item.channel || 'Share', phone: item.phone || item.phoneNumber || item.whatsapp || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' })).filter((item) => item.date);
     }
     function save() { localStorage.setItem(key, JSON.stringify(occasions)); render(); }
     function setStatus(message) { $('status').textContent = message; }
@@ -252,7 +271,7 @@
         const text = await file.text();
         const imported = file.name.toLowerCase().endsWith('.csv') ? parseCsv(text) : JSON.parse(text);
         const normalized = normalizeOccasions(imported);
-        if (!normalized.length) throw new Error('No valid rows found. Use date as YYYY-MM-DD.');
+        if (!normalized.length) throw new Error('No valid rows found. Supported dates: YYYY-MM-DD, Jan 9, 9 Jan, or 1/9.');
         const existing = new Set(occasions.map((item) => item.id));
         occasions = [...occasions, ...normalized.map((item) => existing.has(item.id) ? { ...item, id: crypto.randomUUID() } : item)];
         save(); setStatus(`Imported ${normalized.length} occasion${normalized.length === 1 ? '' : 's'} into this browser. Next: export the calendar and import it into your calendar app to receive reminders.`);
