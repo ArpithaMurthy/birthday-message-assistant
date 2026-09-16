@@ -212,7 +212,7 @@
       const first = item.person.trim().split(/\s+/)[0];
       const recipient = first ? `, ${first}` : '';
       const greeting = item.type === 'Birthday' ? `Happy birthday${recipient}` : item.type === 'Anniversary' ? `Happy anniversary${recipient}` : item.type === 'New Year' ? `Happy New Year${recipient}` : item.type === 'Holiday' ? `Warm wishes for ${item.title}${recipient}` : `Thinking of you for ${item.title}${recipient}`;
-      return `${greeting}! I hope this special occasion brings joy and many wonderful moments.${item.notes ? ` ${item.notes}` : ''}`;
+      return `${greeting}! I wish you lots of happiness, good health, joy and many wonderful moments.${item.notes ? ` ${item.notes}` : ''}`;
     }
     function render() {
       occasions.sort((a, b) => nextDate(a.date) - nextDate(b.date));

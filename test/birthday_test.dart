@@ -34,6 +34,7 @@ void main() {
     final message = MessageService().draft(birthday, MessageTone.warm);
     expect(message, contains('Ada'));
     expect(message, contains('Happy birthday'));
+    expect(message, contains('I wish you lots of happiness, good health, joy and many wonderful moments'));
   });
 
   test('default message overrides generated drafts', () {

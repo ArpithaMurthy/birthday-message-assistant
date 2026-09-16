@@ -18,7 +18,7 @@ class MessageService {
       OccasionType.custom => 'Thinking of you for ${occasion.title}$recipient',
     };
     return switch (tone) {
-      MessageTone.warm => '$greeting! I hope this special occasion brings joy and many wonderful moments.$suffix',
+      MessageTone.warm => '$greeting! I wish you lots of happiness, good health, joy and many wonderful moments.$suffix',
       MessageTone.playful => '$greeting! 🎉 Hope it is filled with laughter, happiness, and plenty of reasons to celebrate.$suffix',
       MessageTone.short => '$greeting! Wishing you a wonderful day. ✨',
       MessageTone.formal => '$greeting. Wishing you happiness, good health, and every success.',
