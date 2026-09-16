@@ -51,6 +51,7 @@ class _PrepareMessageScreenState extends State<PrepareMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final channelLabel = widget.occasion.channel.label;
     return Scaffold(
       appBar: AppBar(title: Text(widget.occasion.calendarTitle)),
       body: SafeArea(
@@ -74,7 +75,7 @@ class _PrepareMessageScreenState extends State<PrepareMessageScreen> {
               decoration: const InputDecoration(labelText: 'Your message', alignLabelWithHint: true),
             ),
             const SizedBox(height: 18),
-            FilledButton.icon(onPressed: _open, icon: const Icon(Icons.send_outlined), label: const Text('Open message composer')),
+            FilledButton.icon(onPressed: _open, icon: const Icon(Icons.send_outlined), label: Text('Open $channelLabel')),
             const SizedBox(height: 10),
             Text('Nothing is sent automatically. You review and press Send in the selected app.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
             if (_openedComposer) ...[

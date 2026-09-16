@@ -4,6 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MessageService {
   String draft(Occasion occasion, MessageTone tone) {
+    if (occasion.defaultMessage.trim().isNotEmpty) {
+      return occasion.defaultMessage.trim();
+    }
     final recipient = occasion.personName.trim().isEmpty ? '' : ', ${occasion.personName.trim().split(RegExp(r'\s+')).first}';
     final memory = occasion.notes.trim();
     final suffix = memory.isEmpty ? '' : ' $memory';
@@ -30,12 +33,15 @@ class MessageService {
     final phone = occasion.phoneNumber.replaceAll(RegExp(r'[^+\d]'), '');
     final encoded = Uri.encodeComponent(message);
     final candidates = switch (occasion.channel) {
-      MessageChannel.sms => [Uri.parse('sms:$phone?body=$encoded')],
-      MessageChannel.whatsapp => [
-          Uri.parse('whatsapp://send?phone=$phone&text=$encoded'),
-          Uri.parse('https://wa.me/$phone?text=$encoded'),
-        ],
       MessageChannel.share => <Uri>[],
+      MessageChannel.sms => [Uri.parse(phone.isEmpty ? 'sms:?body=$encoded' : 'sms:$phone?body=$encoded')],
+      MessageChannel.whatsapp => phone.isEmpty
+          ? [Uri.parse('whatsapp://send?text=$encoded'), Uri.parse('https://wa.me/?text=$encoded')]
+          : [
+              Uri.parse('whatsapp://send?phone=$phone&text=$encoded'),
+              Uri.parse('https://wa.me/$phone?text=$encoded'),
+            ],
+      MessageChannel.line => [Uri.parse('https://line.me/R/share?text=$encoded')],
     };
 
     for (final uri in candidates) {

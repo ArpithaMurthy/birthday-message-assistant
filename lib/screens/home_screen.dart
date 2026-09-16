@@ -1,12 +1,19 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:moments_remembered/models/occasion.dart';
+import 'package:moments_remembered/screens/import_occasions_screen.dart';
 import 'package:moments_remembered/screens/occasion_form.dart';
 import 'package:moments_remembered/screens/prepare_message_screen.dart';
 import 'package:moments_remembered/services/calendar_service.dart';
+import 'package:moments_remembered/services/data_transfer_service.dart';
 import 'package:moments_remembered/services/notification_service.dart';
 import 'package:moments_remembered/services/occasion_repository.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _repository = OccasionRepository();
   final _notifications = NotificationService();
   final _calendar = CalendarService();
+  final _dataTransfer = DataTransferService();
+  final _uuid = const Uuid();
   List<Occasion> _occasions = [];
   bool _loading = true;
   bool _remindersEnabled = false;
@@ -74,6 +83,33 @@ class _HomeScreenState extends State<HomeScreen> {
     await _persist();
   }
 
+  Future<void> _importOccasions() async {
+    final imported = await Navigator.push<List<Occasion>>(context, MaterialPageRoute(builder: (_) => const ImportOccasionsScreen()));
+    if (imported == null || imported.isEmpty) return;
+    final existingIds = _occasions.map((occasion) => occasion.id).toSet();
+    _occasions.addAll(imported.map((occasion) => existingIds.contains(occasion.id) ? occasion.copyWith(id: _uuid.v4(), clearHandledYear: true) : occasion));
+    await _persist();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Imported ${imported.length} occasion${imported.length == 1 ? '' : 's'}.')));
+  }
+
+  Future<void> _exportBackup() async {
+    final content = _dataTransfer.exportJson(_occasions);
+    final file = XFile.fromData(
+      Uint8List.fromList(utf8.encode(content)),
+      mimeType: 'application/json',
+      name: 'moments-remembered-data.json',
+    );
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [file],
+        fileNameOverrides: const ['moments-remembered-data.json'],
+        subject: 'Moments Remembered backup',
+        text: 'Private local backup of my occasion reminders.',
+      ),
+    );
+  }
+
   Future<void> _prepare(Occasion occasion) async {
     final updated = await Navigator.push<Occasion>(context, MaterialPageRoute(builder: (_) => PrepareMessageScreen(occasion: occasion)));
     if (updated == null) return;
@@ -113,6 +149,16 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Moments Remembered'),
         actions: [
           if (_occasions.isNotEmpty) IconButton(onPressed: _exportCalendar, tooltip: 'Export to calendar', icon: const Icon(Icons.calendar_month_outlined)),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'import') _importOccasions();
+              if (value == 'backup') _exportBackup();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'import', child: Text('Import list')),
+              PopupMenuItem(value: 'backup', child: Text('Export backup')),
+            ],
+          ),
           IconButton(onPressed: _addOccasion, tooltip: 'Add occasion', icon: const Icon(Icons.add_circle_outline)),
         ],
       ),
@@ -120,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _occasions.isEmpty
-              ? _EmptyState(onAdd: _addOccasion)
+              ? _EmptyState(onAdd: _addOccasion, onImport: _importOccasions)
               : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView(
@@ -129,6 +175,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('Thoughtfulness, on time.', style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 6),
                       Text('Private reminders for birthdays, anniversaries, holidays, and the moments that matter.', style: Theme.of(context).textTheme.bodyMedium),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.icon(onPressed: _addOccasion, icon: const Icon(Icons.add), label: const Text('Add')),
+                          OutlinedButton.icon(onPressed: _importOccasions, icon: const Icon(Icons.upload_file), label: const Text('Import')),
+                          OutlinedButton.icon(onPressed: _exportBackup, icon: const Icon(Icons.ios_share), label: const Text('Backup')),
+                        ],
+                      ),
                       if (!_remindersEnabled) ...[
                         const SizedBox(height: 18),
                         Card(
@@ -188,7 +244,7 @@ class _OccasionCard extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(occasion.calendarTitle, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 3),
-                Text('${occasion.type.label}${occasion.relationship.isEmpty ? '' : ' · ${occasion.relationship}'} · ${DateFormat('d MMM').format(occurrence)}'),
+                  Text('${occasion.type.label}${occasion.relationship.isEmpty ? '' : ' · ${occasion.relationship}'} · ${DateFormat('d MMM').format(occurrence)} · ${occasion.channel.label}'),
                 const SizedBox(height: 6),
                 Text(handled ? 'Handled for ${occurrence.year}' : timing, style: TextStyle(color: handled ? Colors.green.shade700 : Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
               ]),
@@ -208,8 +264,9 @@ class _OccasionCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onAdd});
+  const _EmptyState({required this.onAdd, required this.onImport});
   final VoidCallback onAdd;
+  final VoidCallback onImport;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -222,7 +279,9 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 10),
             const Text('Add a birthday, anniversary, holiday, or custom occasion. This device will remind you and help prepare a thoughtful message.', textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Add the first occasion')),
+            FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Add one occasion')),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(onPressed: onImport, icon: const Icon(Icons.upload_file), label: const Text('Import a list')),
           ]),
         ),
       );

@@ -1,4 +1,13 @@
-enum MessageChannel { sms, whatsapp, share }
+enum MessageChannel { share, whatsapp, line, sms }
+
+extension MessageChannelLabel on MessageChannel {
+  String get label => switch (this) {
+        MessageChannel.share => 'Share',
+        MessageChannel.whatsapp => 'WhatsApp',
+        MessageChannel.line => 'LINE',
+        MessageChannel.sms => 'SMS / iMessage',
+      };
+}
 
 enum MessageTone { warm, playful, short, formal }
 
@@ -34,6 +43,7 @@ class Occasion {
     this.relationship = '',
     this.phoneNumber = '',
     this.notes = '',
+    this.defaultMessage = '',
     this.reminderDays = const [7, 1, 0],
     this.lastHandledYear,
   });
@@ -48,6 +58,7 @@ class Occasion {
   final MessageChannel channel;
   final String phoneNumber;
   final String notes;
+  final String defaultMessage;
   final List<int> reminderDays;
   final int? lastHandledYear;
 
@@ -82,9 +93,9 @@ class Occasion {
     return DateTime(year, month, day);
   }
 
-  Occasion copyWith({int? lastHandledYear, bool clearHandledYear = false}) {
+  Occasion copyWith({String? id, int? lastHandledYear, bool clearHandledYear = false}) {
     return Occasion(
-      id: id,
+      id: id ?? this.id,
       title: title,
       personName: personName,
       type: type,
@@ -94,6 +105,7 @@ class Occasion {
       channel: channel,
       phoneNumber: phoneNumber,
       notes: notes,
+      defaultMessage: defaultMessage,
       reminderDays: reminderDays,
       lastHandledYear: clearHandledYear ? null : lastHandledYear ?? this.lastHandledYear,
     );
@@ -110,6 +122,7 @@ class Occasion {
         'channel': channel.name,
         'phoneNumber': phoneNumber,
         'notes': notes,
+        'defaultMessage': defaultMessage,
         'reminderDays': reminderDays,
         'lastHandledYear': lastHandledYear,
       };
@@ -121,13 +134,14 @@ class Occasion {
       id: json['id']! as String,
       title: (json['title'] as String?) ?? OccasionType.birthday.defaultTitle,
       personName: (json['personName'] as String?) ?? legacyName,
-      type: OccasionType.values.where((value) => value.name == typeName).firstOrNull ?? OccasionType.custom,
+      type: _occasionTypeFromJson(typeName),
       month: json['month']! as int,
       day: json['day']! as int,
       relationship: (json['relationship'] as String?) ?? '',
-      channel: MessageChannel.values.byName(json['channel']! as String),
+      channel: _channelFromJson(json['channel']),
       phoneNumber: (json['phoneNumber'] as String?) ?? '',
       notes: (json['notes'] as String?) ?? '',
+      defaultMessage: ((json['defaultMessage'] as String?) ?? (json['default_message'] as String?) ?? '').trim(),
       reminderDays: ((json['reminderDays'] as List<Object?>?) ?? [7, 1, 0]).cast<int>(),
       lastHandledYear: json['lastHandledYear'] as int?,
     );
@@ -135,3 +149,20 @@ class Occasion {
 }
 
 bool _isLeapYear(int year) => year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+
+MessageChannel _channelFromJson(Object? value) {
+  final normalized = value?.toString().trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '') ?? '';
+  return switch (normalized) {
+    'whatsapp' => MessageChannel.whatsapp,
+    'line' => MessageChannel.line,
+    'sms' || 'imessage' || 'smsimessage' => MessageChannel.sms,
+    _ => MessageChannel.share,
+  };
+}
+
+OccasionType _occasionTypeFromJson(String typeName) {
+  for (final value in OccasionType.values) {
+    if (value.name == typeName) return value;
+  }
+  return OccasionType.custom;
+}

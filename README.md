@@ -128,6 +128,22 @@ flutter run
 
 Android and iOS host projects are already versioned. Do not regenerate them during a normal laptop migration.
 
+## Native mobile app UX
+
+The Flutter app is the best no-hosting path because it keeps data on the phone and uses native local notifications. The main flow is intentionally short:
+
+1. Open the app and tap **Import list** or **Add one occasion**.
+2. Enable reminders once.
+3. When a reminder arrives, tap the occasion.
+4. Review the draft and tap **Open WhatsApp**, **Open LINE**, **Open SMS / iMessage**, or **Open Share**.
+5. The messaging app opens with the draft; the user still presses Send.
+
+The app supports local CSV/JSON import by pasting data into **Import list**, plus JSON backup export from the home menu. Supported import fields match Web Lite: `type`, `title`, `date`, `person`, `relationship`, `channel`, `phone`, `notes`, and `default_message`. Friendly dates such as `Jan 9`, `9 Jan`, `Dec 11th`, `7/12`, and `2026-01-09` are accepted.
+
+There is still no server account, hosting, analytics SDK, contact upload, or automatic message sending.
+
+GitHub Actions runs **Mobile CI** on mobile changes: `flutter analyze`, `flutter test`, and `flutter build apk --debug`. The debug APK is uploaded as an artifact named `moments-remembered-debug-apk`, which is useful for private friend testing before spending money on store publication.
+
 ## Optional Web Lite container
 
 Docker provides a repeatable local server for `web-lite/`, but is not needed for Flutter development and cannot provide native mobile notifications:

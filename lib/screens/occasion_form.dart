@@ -16,9 +16,10 @@ class _OccasionFormState extends State<OccasionForm> {
   final _relationship = TextEditingController();
   final _phone = TextEditingController();
   final _notes = TextEditingController();
+  final _defaultMessage = TextEditingController();
   DateTime _date = DateTime(DateTime.now().year, 1, 1);
   OccasionType _type = OccasionType.birthday;
-  MessageChannel _channel = MessageChannel.sms;
+  MessageChannel _channel = MessageChannel.share;
 
   @override
   void dispose() {
@@ -27,6 +28,7 @@ class _OccasionFormState extends State<OccasionForm> {
     _relationship.dispose();
     _phone.dispose();
     _notes.dispose();
+    _defaultMessage.dispose();
     super.dispose();
   }
 
@@ -67,6 +69,7 @@ class _OccasionFormState extends State<OccasionForm> {
         relationship: _relationship.text.trim(),
         phoneNumber: _phone.text.trim(),
         notes: _notes.text.trim(),
+        defaultMessage: _defaultMessage.text.trim(),
         channel: _channel,
       ),
     );
@@ -120,7 +123,7 @@ class _OccasionFormState extends State<OccasionForm> {
               DropdownButtonFormField<MessageChannel>(
                 initialValue: _channel,
                 decoration: const InputDecoration(labelText: 'Preferred channel', prefixIcon: Icon(Icons.send_outlined)),
-                items: MessageChannel.values.map((channel) => DropdownMenuItem(value: channel, child: Text(channel == MessageChannel.sms ? 'SMS / iMessage' : channel == MessageChannel.whatsapp ? 'WhatsApp' : 'Share sheet'))).toList(),
+                items: MessageChannel.values.map((channel) => DropdownMenuItem(value: channel, child: Text(channel.label))).toList(),
                 onChanged: (value) => setState(() => _channel = value!),
               ),
               const SizedBox(height: 14),
@@ -134,6 +137,16 @@ class _OccasionFormState extends State<OccasionForm> {
                 controller: _notes,
                 maxLines: 3,
                 decoration: const InputDecoration(labelText: 'Personal note (optional)', hintText: 'A memory or detail to mention', prefixIcon: Icon(Icons.edit_note)),
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _defaultMessage,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Default message (optional)',
+                  hintText: 'Use this exact draft when preparing this occasion',
+                  prefixIcon: Icon(Icons.message_outlined),
+                ),
               ),
               const SizedBox(height: 28),
               FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: const Text('Save occasion')),
