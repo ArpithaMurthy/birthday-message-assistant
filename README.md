@@ -25,7 +25,7 @@ Open [web-lite/index.html](web-lite/index.html) in a browser or deploy that fold
 
 ## Deploy Web Lite for anyone to use
 
-The repository includes a GitHub Pages workflow at `.github/workflows/deploy-web-lite.yml` that publishes only the static `web-lite/` folder. The deployed app stores each user's occasions in that user's browser `localStorage`; there is no server account, database, analytics SDK, or contact upload.
+The repository includes a GitHub Pages workflow at `.github/workflows/deploy-web-lite.yml` that publishes only the static `web-lite/` folder. The deployed app stores each user's reminders in that user's browser `localStorage`; there is no server account, database, analytics SDK, or contact upload.
 
 Adding or importing occasions in Web Lite does **not** automatically add them to a calendar. The user must click **Export calendar** and import the downloaded `.ics` file into Apple Calendar, Google Calendar, or Outlook. Reminder delivery then depends on that calendar app and the user's device notification settings. If calendar notifications are disabled, the browser app cannot force a reminder.
 
@@ -39,7 +39,7 @@ To deploy:
 For a public repository, the app URL is:
 
 ```text
-https://ArpithaMurthy.github.io/birthday-message-assistant/
+https://ArpithaMurthy.github.io/tinytools/
 ```
 
 If the repository stays private, confirm your GitHub plan and Pages visibility settings support public access. If you need a guaranteed public URL while keeping the repo private, deploy `web-lite/` to a static host such as Azure Static Web Apps, Netlify, Vercel, or Cloudflare Pages.
@@ -96,7 +96,7 @@ WhatsApp and SMS can use a saved phone number. LINE web sharing opens LINE with 
 
 Follow [docs/SETUP_AND_VERIFICATION.md](docs/SETUP_AND_VERIFICATION.md) for the complete clone, Android SDK, build, phone-testing, iPhone/Web Lite, and Docker workflow.
 
-Git preserves source code, not personal occasions. Mobile data stays on the phone and Web Lite data stays in that browser. Exporting a calendar provides a portable reminder snapshot; encrypted app backup/import remains future work.
+Git preserves source code, not personal reminders. Mobile data stays on the phone and Web Lite data stays in that browser. Exporting a calendar provides a portable reminder snapshot; encrypted app backup/import remains future work.
 
 ## Stage-by-stage plan
 
@@ -148,7 +148,7 @@ The app supports local CSV/JSON import by pasting data into **Import list**, plu
 
 There is still no server account, hosting, analytics SDK, contact upload, or automatic message sending.
 
-GitHub Actions runs **Mobile CI** on mobile changes: `flutter analyze`, `flutter test`, and `flutter build apk --debug`. The debug APK is uploaded as an artifact named `moments-remembered-debug-apk`, which is useful for private friend testing before spending money on store publication.
+GitHub Actions runs **Mobile CI** on mobile changes: `flutter analyze`, `flutter test`, and `flutter build apk --debug`. The debug APK is uploaded as an artifact named `tinytools-debug-apk`, which is useful for private friend testing before spending money on store publication.
 
 ## TinyTools launch workflow
 

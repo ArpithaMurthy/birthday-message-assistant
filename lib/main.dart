@@ -14,7 +14,7 @@ class MomentsRememberedApp extends StatelessWidget {
     const seed = Color(0xFF815A46);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Moments Remembered',
+      title: 'TinyTools Life Admin',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light),
         scaffoldBackgroundColor: const Color(0xFFFFFBF7),

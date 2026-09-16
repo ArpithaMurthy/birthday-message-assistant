@@ -2,7 +2,7 @@
 
 Last updated: September 11, 2026
 
-Moments Remembered is designed to work locally on the user's device.
+TinyTools Life Admin is designed to work locally on the user's device.
 
 ## Data used
 

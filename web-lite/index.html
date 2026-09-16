@@ -171,9 +171,10 @@
   </dialog>
 
   <script>
-    const key = 'moments-remembered.occasions.v1';
+    const legacyKey = 'moments-remembered.occasions.v1';
+    const key = 'tinytools.life-admin.v1';
     const $ = (id) => document.getElementById(id);
-    let occasions = normalizeOccasions(JSON.parse(localStorage.getItem(key) || '[]'));
+    let occasions = normalizeOccasions(JSON.parse(localStorage.getItem(key) || localStorage.getItem(legacyKey) || '[]'));
     let activeOccasion = null;
     const type = $('type');
     const titles = { Birthday: 'Birthday', Anniversary: 'Wedding anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion', Renewal: 'Renewal', Bill: 'Bill due', Task: 'Task', 'Follow-up': 'Follow-up' };
@@ -306,17 +307,17 @@
         event.target.value = '';
       }
     });
-    $('export-data').addEventListener('click', () => downloadFile('moments-remembered-data.json', 'application/json', JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), occasions }, null, 2)));
+    $('export-data').addEventListener('click', () => downloadFile('tinytools-life-admin-data.json', 'application/json', JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), occasions }, null, 2)));
     function esc(value) { return value.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
     $('export').addEventListener('click', () => {
       const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
       const alarm = (trigger, summary) => ['BEGIN:VALARM',`TRIGGER:${trigger}`,'ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM'];
       const events = occasions.map((item) => {
         const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`, repeat = item.repeat || inferRepeat(item.type);
-        return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`, repeat === 'yearly' ? 'RRULE:FREQ=YEARLY' : repeat === 'monthly' ? 'RRULE:FREQ=MONTHLY' : '',`SUMMARY:${esc(summary)}`, item.notes ? `DESCRIPTION:${esc(item.notes)}` : '', item.actionUrl ? `URL:${esc(item.actionUrl)}` : '', ...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].filter(Boolean).join('\r\n');
+        return ['BEGIN:VEVENT',`UID:${item.id}@tinytools.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`, repeat === 'yearly' ? 'RRULE:FREQ=YEARLY' : repeat === 'monthly' ? 'RRULE:FREQ=MONTHLY' : '',`SUMMARY:${esc(summary)}`, item.notes ? `DESCRIPTION:${esc(item.notes)}` : '', item.actionUrl ? `URL:${esc(item.actionUrl)}` : '', ...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].filter(Boolean).join('\r\n');
       }).join('\r\n');
-      const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Moments Remembered//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR\r\n`;
-      downloadFile('moments-remembered.ics', 'text/calendar', content);
+      const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TinyTools//Life Admin//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:TinyTools Life Admin\r\n${events}\r\nEND:VCALENDAR\r\n`;
+      downloadFile('tinytools-life-admin.ics', 'text/calendar', content);
     });
     $('date').value = new Date().toISOString().slice(0,10); render();
   </script>

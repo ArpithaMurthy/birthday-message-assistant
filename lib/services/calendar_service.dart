@@ -10,13 +10,13 @@ class CalendarService {
     final file = XFile.fromData(
       Uint8List.fromList(utf8.encode(content)),
       mimeType: 'text/calendar',
-      name: 'moments-remembered.ics',
+      name: 'tinytools-life-admin.ics',
     );
     await SharePlus.instance.share(
       ShareParams(
         files: [file],
-        fileNameOverrides: const ['moments-remembered.ics'],
-        subject: 'Moments Remembered calendar',
+        fileNameOverrides: const ['tinytools-life-admin.ics'],
+        subject: 'TinyTools Life Admin calendar',
         text: 'Import these private recurring occasions into your calendar.',
       ),
     );
@@ -26,10 +26,10 @@ class CalendarService {
     final lines = <String>[
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Moments Remembered//Occasions//EN',
+      'PRODID:-//TinyTools//Life Admin//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:PUBLISH',
-      'X-WR-CALNAME:Moments Remembered',
+      'X-WR-CALNAME:TinyTools Life Admin',
     ];
     final stamp = _dateTime(DateTime.now().toUtc());
     for (final occasion in occasions) {
@@ -37,7 +37,7 @@ class CalendarService {
       final start = '${next.year.toString().padLeft(4, '0')}${next.month.toString().padLeft(2, '0')}${next.day.toString().padLeft(2, '0')}';
       lines.addAll([
         'BEGIN:VEVENT',
-        'UID:${_escape(occasion.id)}@moments-remembered.local',
+        'UID:${_escape(occasion.id)}@tinytools.local',
         'DTSTAMP:$stamp',
         'DTSTART;VALUE=DATE:$start',
         if (occasion.repeat == 'yearly') 'RRULE:FREQ=YEARLY',

@@ -98,13 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final file = XFile.fromData(
       Uint8List.fromList(utf8.encode(content)),
       mimeType: 'application/json',
-      name: 'moments-remembered-data.json',
+      name: 'tinytools-life-admin-data.json',
     );
     await SharePlus.instance.share(
       ShareParams(
         files: [file],
-        fileNameOverrides: const ['moments-remembered-data.json'],
-        subject: 'Moments Remembered backup',
+        fileNameOverrides: const ['tinytools-life-admin-data.json'],
+        subject: 'TinyTools Life Admin backup',
         text: 'Private local backup of my occasion reminders.',
       ),
     );
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final later = _occasions.where((occasion) => occasion.daysUntil() > 30).toList();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Moments Remembered'),
+        title: const Text('TinyTools'),
         actions: [
           if (_occasions.isNotEmpty) IconButton(onPressed: _exportCalendar, tooltip: 'Export to calendar', icon: const Icon(Icons.calendar_month_outlined)),
           PopupMenuButton<String>(

@@ -10,8 +10,8 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 
-APP_NAME = "Moments Remembered"
-APP_URL = "https://arpithamurthy.github.io/birthday-message-assistant/"
+APP_NAME = "TinyTools Life Admin"
+APP_URL = "https://arpithamurthy.github.io/tinytools/"
 OUTBOX = Path("launch_outbox")
 TRACKER = OUTBOX / "posting_tracker.csv"
 

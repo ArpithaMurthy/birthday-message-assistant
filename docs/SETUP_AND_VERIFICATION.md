@@ -1,6 +1,6 @@
 # Setup, migration, and verification
 
-This guide is the recovery checklist for a new Windows laptop and the test plan for confirming that Moments Remembered works as intended.
+This guide is the recovery checklist for a new Windows laptop and the test plan for confirming that TinyTools Life Admin works as intended.
 
 ## Important distinction: source code versus personal data
 
@@ -39,8 +39,8 @@ Add Flutter's `bin` directory to the user `PATH`.
 Clone the private GitHub repository while signed in as its owner:
 
 ```text
-git clone https://github.com/ArpithaMurthy/birthday-message-assistant.git
-cd birthday-message-assistant
+git clone https://github.com/ArpithaMurthy/tinytools.git
+cd tinytools
 ```
 
 Open that folder, then run:
