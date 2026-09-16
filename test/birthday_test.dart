@@ -25,6 +25,40 @@ void main() {
     expect(birthday.nextOccurrence(DateTime(2026, 12, 11)), DateTime(2027, 12, 10));
   });
 
+  test('one-time reminders keep the actual deadline year', () {
+    const renewal = Occasion(
+      id: 'passport',
+      title: 'Passport renewal',
+      personName: '',
+      type: OccasionType.custom,
+      year: 2027,
+      month: 10,
+      day: 12,
+      module: 'Documents & renewals',
+      channel: MessageChannel.share,
+      repeat: 'none',
+    );
+
+    expect(renewal.nextOccurrence(DateTime(2028, 1, 1)), DateTime(2027, 10, 12));
+    expect(renewal.daysUntil(DateTime(2028, 1, 1)), isNegative);
+  });
+
+  test('monthly reminders roll to the next month after this month passes', () {
+    const bill = Occasion(
+      id: 'bill',
+      title: 'Phone bill',
+      personName: '',
+      type: OccasionType.custom,
+      month: 1,
+      day: 31,
+      module: 'Subscriptions & bills',
+      channel: MessageChannel.share,
+      repeat: 'monthly',
+    );
+
+    expect(bill.nextOccurrence(DateTime(2026, 2, 1)), DateTime(2026, 2, 28));
+  });
+
   test('uses February 28 for leap-day birthdays in ordinary years', () {
     const leapBirthday = Occasion(id: '2', title: 'Birthday', personName: 'Lea', type: OccasionType.birthday, month: 2, day: 29, relationship: 'Friend', channel: MessageChannel.share);
     expect(leapBirthday.nextOccurrence(DateTime(2027)), DateTime(2027, 2, 28));

@@ -125,6 +125,7 @@
       <summary>Add reminder</summary>
       <form id="occasion-form">
         <label>Module<select id="module"><option>Occasions</option><option>Documents & renewals</option><option>Visa & admin</option><option>Home maintenance</option><option>Subscriptions & bills</option><option>Gift planning</option><option>Job search</option><option>Family care</option></select></label>
+        <label>Quick preset<select id="preset"><option value="">Choose a preset, or fill manually</option><option value="passport">Passport renewal</option><option value="visa">Visa / permit renewal</option><option value="license">Driver license renewal</option><option value="insurance">Insurance renewal</option><option value="warranty">Warranty expiry</option><option value="vehicle">Vehicle service</option><option value="home">Home maintenance</option><option value="bill">Monthly bill</option><option value="subscription">Subscription renewal</option><option value="gift">Gift to buy</option><option value="job">Job follow-up</option><option value="family">Family care check-in</option></select></label>
         <div class="grid">
           <label>Type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option><option>Renewal</option><option>Bill</option><option>Task</option><option>Follow-up</option></select></label>
           <label>Date or deadline<input id="date" type="date" required></label>
@@ -181,15 +182,40 @@
     const moduleType = { Occasions: 'Birthday', 'Documents & renewals': 'Renewal', 'Visa & admin': 'Renewal', 'Home maintenance': 'Task', 'Subscriptions & bills': 'Bill', 'Gift planning': 'Task', 'Job search': 'Follow-up', 'Family care': 'Task' };
     $('add-panel').open = !window.matchMedia('(max-width: 560px)').matches;
     $('module').addEventListener('change', () => { type.value = moduleType[$('module').value] || 'Task'; type.dispatchEvent(new Event('change')); $('repeat').value = $('module').value === 'Subscriptions & bills' ? 'monthly' : $('module').value === 'Occasions' ? 'yearly' : 'none'; });
+    $('preset').addEventListener('change', () => {
+      const preset = presets[$('preset').value]; if (!preset) return;
+      $('module').value = preset.module; type.value = preset.type; $('title').value = preset.title; $('relationship').value = preset.relationship; $('repeat').value = preset.repeat; $('notes').value = preset.notes;
+    });
     type.addEventListener('change', () => { $('title').value = titles[type.value]; if (type.value === 'New Year') $('date').value = `${new Date().getFullYear()}-01-01`; });
 
-    function nextDate(value) {
+    function nextDate(value, repeat = 'yearly') {
       const source = new Date(`${value}T12:00:00`), now = new Date();
+      if (repeat === 'none') return source;
+      if (repeat === 'monthly') {
+        let candidate = new Date(now.getFullYear(), now.getMonth(), source.getDate(), 12);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+        if (candidate < today) candidate = new Date(now.getFullYear(), now.getMonth() + 1, source.getDate(), 12);
+        return candidate;
+      }
       let candidate = new Date(now.getFullYear(), source.getMonth(), source.getDate(), 12);
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
       if (candidate < today) candidate.setFullYear(candidate.getFullYear() + 1);
       return candidate;
     }
+    const presets = {
+      passport: { module: 'Documents & renewals', type: 'Renewal', title: 'Passport renewal', relationship: 'Passport', repeat: 'none', notes: 'Check validity, required documents, appointment slots, and processing time.' },
+      visa: { module: 'Visa & admin', type: 'Renewal', title: 'Visa / permit renewal', relationship: 'Immigration', repeat: 'none', notes: 'Check renewal window, documents, fees, and appointment requirements.' },
+      license: { module: 'Documents & renewals', type: 'Renewal', title: 'Driver license renewal', relationship: 'License', repeat: 'none', notes: 'Check renewal documents, test/medical requirements, and fees.' },
+      insurance: { module: 'Documents & renewals', type: 'Renewal', title: 'Insurance renewal', relationship: 'Insurance', repeat: 'yearly', notes: 'Compare renewal price, coverage, and payment deadline.' },
+      warranty: { module: 'Documents & renewals', type: 'Renewal', title: 'Warranty expiry', relationship: 'Warranty', repeat: 'none', notes: 'Check whether repair, replacement, or extended warranty action is needed.' },
+      vehicle: { module: 'Home maintenance', type: 'Task', title: 'Vehicle service', relationship: 'Vehicle', repeat: 'none', notes: 'Book service, check insurance/registration, and note mileage.' },
+      home: { module: 'Home maintenance', type: 'Task', title: 'Home maintenance', relationship: 'Home', repeat: 'none', notes: 'Book service and check supplies or spare parts.' },
+      bill: { module: 'Subscriptions & bills', type: 'Bill', title: 'Bill due', relationship: 'Bills', repeat: 'monthly', notes: 'Pay before the due date and keep confirmation.' },
+      subscription: { module: 'Subscriptions & bills', type: 'Renewal', title: 'Subscription renewal', relationship: 'Subscription', repeat: 'monthly', notes: 'Review usage and cancel or renew before billing.' },
+      gift: { module: 'Gift planning', type: 'Task', title: 'Buy gift', relationship: 'Gift', repeat: 'none', notes: 'Pick gift, confirm address, and order early.' },
+      job: { module: 'Job search', type: 'Follow-up', title: 'Job follow-up', relationship: 'Job search', repeat: 'none', notes: 'Follow up politely with context and next step.' },
+      family: { module: 'Family care', type: 'Task', title: 'Family care check-in', relationship: 'Family', repeat: 'none', notes: 'Call, message, or check if anything is needed.' }
+    };
     function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
     function normalizeDate(value) {
       const raw = String(value || '').trim();
@@ -224,7 +250,7 @@
     function draft(item) {
       if (item.defaultMessage && item.defaultMessage.trim()) return item.defaultMessage.trim();
       if (item.module && item.module !== 'Occasions') {
-        return `Reminder: ${item.title}${item.person ? ` for ${item.person}` : ''} is coming up on ${nextDate(item.date).toLocaleDateString()}.${item.notes ? ` ${item.notes}` : ''}`;
+        return `Reminder: ${item.title}${item.person ? ` for ${item.person}` : ''} is coming up on ${nextDate(item.date, item.repeat).toLocaleDateString()}.${item.notes ? ` ${item.notes}` : ''}`;
       }
       const first = item.person.trim().split(/\s+/)[0];
       const recipient = first ? `, ${first}` : '';
@@ -232,19 +258,19 @@
       return `${greeting}! I wish you lots of happiness, good health, joy and many wonderful moments.${item.notes ? ` ${item.notes}` : ''}`;
     }
     function render() {
-      occasions.sort((a, b) => nextDate(a.date) - nextDate(b.date));
+      occasions.sort((a, b) => nextDate(a.date, a.repeat) - nextDate(b.date, b.repeat));
       $('count').textContent = `${occasions.length} saved`;
       $('export').disabled = occasions.length === 0;
       $('export-data').disabled = occasions.length === 0;
       $('occasions').innerHTML = occasions.length ? occasions.map((item) => {
-        const date = nextDate(item.date), month = date.toLocaleString(undefined, { month: 'short' }), days = Math.round((date - new Date(new Date().setHours(0,0,0,0))) / 86400000);
-        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.module || 'Occasions')} · ${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · ${escapeHtml(item.channel || 'Share')}${item.defaultMessage ? ' · Default text saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare</button>${item.actionUrl ? `<a class="secondary" href="${escapeHtml(item.actionUrl)}" target="_blank" rel="noopener">Open link</a>` : ''}</div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
+        const date = nextDate(item.date, item.repeat), month = date.toLocaleString(undefined, { month: 'short' }), days = Math.round((date - new Date(new Date().setHours(0,0,0,0))) / 86400000), timing = days < 0 ? `Overdue by ${Math.abs(days)} day${days === -1 ? '' : 's'}` : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.module || 'Occasions')} · ${escapeHtml(item.type)} · ${timing} · ${escapeHtml(item.channel || 'Share')}${item.defaultMessage ? ' · Default text saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare</button>${item.actionUrl ? `<a class="secondary" href="${escapeHtml(item.actionUrl)}" target="_blank" rel="noopener">Open link</a>` : ''}</div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
       }).join('') : '<div class="card empty"><h3>No occasions yet</h3><p class="muted">Add a birthday, anniversary, holiday, or custom moment above.</p></div>';
     }
     $('occasion-form').addEventListener('submit', (event) => {
       event.preventDefault();
       occasions.push({ id: crypto.randomUUID(), module: $('module').value, type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), channel: $('channel').value, phone: $('phone').value.trim(), repeat: $('repeat').value, actionUrl: $('action-url').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
-      save(); event.target.reset(); $('module').value = 'Occasions'; type.value = 'Birthday'; $('repeat').value = 'yearly'; $('title').value = 'Birthday'; if (window.matchMedia('(max-width: 560px)').matches) $('add-panel').open = false; setStatus('Reminder saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
+      save(); event.target.reset(); $('module').value = 'Occasions'; $('preset').value = ''; type.value = 'Birthday'; $('repeat').value = 'yearly'; $('title').value = 'Birthday'; if (window.matchMedia('(max-width: 560px)').matches) $('add-panel').open = false; setStatus('Reminder saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
     });
     $('occasions').addEventListener('click', (event) => {
       const id = event.target.dataset.id; if (!id) return;
@@ -313,7 +339,7 @@
       const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
       const alarm = (trigger, summary) => ['BEGIN:VALARM',`TRIGGER:${trigger}`,'ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM'];
       const events = occasions.map((item) => {
-        const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`, repeat = item.repeat || inferRepeat(item.type);
+        const date = nextDate(item.date, item.repeat), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`, repeat = item.repeat || inferRepeat(item.type);
         return ['BEGIN:VEVENT',`UID:${item.id}@tinytools.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`, repeat === 'yearly' ? 'RRULE:FREQ=YEARLY' : repeat === 'monthly' ? 'RRULE:FREQ=MONTHLY' : '',`SUMMARY:${esc(summary)}`, item.notes ? `DESCRIPTION:${esc(item.notes)}` : '', item.actionUrl ? `URL:${esc(item.actionUrl)}` : '', ...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].filter(Boolean).join('\r\n');
       }).join('\r\n');
       const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TinyTools//Life Admin//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:TinyTools Life Admin\r\n${events}\r\nEND:VCALENDAR\r\n`;

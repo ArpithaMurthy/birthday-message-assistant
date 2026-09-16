@@ -37,6 +37,7 @@ class Occasion {
     required this.title,
     required this.personName,
     required this.type,
+    this.year,
     required this.month,
     required this.day,
     required this.channel,
@@ -55,6 +56,7 @@ class Occasion {
   final String title;
   final String personName;
   final OccasionType type;
+  final int? year;
   final int month;
   final int day;
   final String module;
@@ -74,6 +76,18 @@ class Occasion {
 
   DateTime nextOccurrence([DateTime? from]) {
     final now = from ?? DateTime.now();
+    if (repeat == 'none' && year != null) {
+      return _safeDate(year!);
+    }
+    if (repeat == 'monthly') {
+      var candidate = _safeDate(now.year, month: now.month);
+      final today = DateTime(now.year, now.month, now.day);
+      if (candidate.isBefore(today)) {
+        final nextMonth = DateTime(now.year, now.month + 1);
+        candidate = _safeDate(nextMonth.year, month: nextMonth.month);
+      }
+      return candidate;
+    }
     var year = now.year;
     var candidate = _safeDate(year);
     final today = DateTime(now.year, now.month, now.day);
@@ -92,11 +106,13 @@ class Occasion {
 
   bool isHandledFor(int year) => lastHandledYear == year;
 
-  DateTime _safeDate(int year) {
-    if (month == 2 && day == 29 && !_isLeapYear(year)) {
-      return DateTime(year, 2, 28);
+  DateTime _safeDate(int targetYear, {int? month}) {
+    final targetMonth = month ?? this.month;
+    final lastDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    if (day > lastDay) {
+      return DateTime(targetYear, targetMonth, lastDay);
     }
-    return DateTime(year, month, day);
+    return DateTime(targetYear, targetMonth, day);
   }
 
   Occasion copyWith({String? id, int? lastHandledYear, bool clearHandledYear = false}) {
@@ -105,6 +121,7 @@ class Occasion {
       title: title,
       personName: personName,
       type: type,
+      year: year,
       month: month,
       day: day,
       module: module,
@@ -125,6 +142,7 @@ class Occasion {
         'title': title,
         'personName': personName,
         'type': type.name,
+        'year': year,
         'month': month,
         'day': day,
         'module': module,
@@ -147,6 +165,7 @@ class Occasion {
       title: (json['title'] as String?) ?? OccasionType.birthday.defaultTitle,
       personName: (json['personName'] as String?) ?? legacyName,
       type: _occasionTypeFromJson(typeName),
+      year: json['year'] as int?,
       month: json['month']! as int,
       day: json['day']! as int,
       module: (json['module'] as String?) ?? (json['category'] as String?) ?? _moduleFromType(typeName),

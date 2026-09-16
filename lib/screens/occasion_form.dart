@@ -20,6 +20,7 @@ class _OccasionFormState extends State<OccasionForm> {
   final _actionUrl = TextEditingController();
   DateTime _date = DateTime(DateTime.now().year, 1, 1);
   String _module = 'Occasions';
+  String _preset = '';
   String _repeat = 'yearly';
   OccasionType _type = OccasionType.birthday;
   MessageChannel _channel = MessageChannel.share;
@@ -32,6 +33,20 @@ class _OccasionFormState extends State<OccasionForm> {
     'Gift planning': OccasionType.custom,
     'Job search': OccasionType.custom,
     'Family care': OccasionType.custom,
+  };
+  static const _presets = {
+    'passport': _ReminderPreset('Documents & renewals', OccasionType.custom, 'Passport renewal', 'Passport', 'none', 'Check validity, required documents, appointment slots, and processing time.'),
+    'visa': _ReminderPreset('Visa & admin', OccasionType.custom, 'Visa / permit renewal', 'Immigration', 'none', 'Check renewal window, documents, fees, and appointment requirements.'),
+    'license': _ReminderPreset('Documents & renewals', OccasionType.custom, 'Driver license renewal', 'License', 'none', 'Check renewal documents, test/medical requirements, and fees.'),
+    'insurance': _ReminderPreset('Documents & renewals', OccasionType.custom, 'Insurance renewal', 'Insurance', 'yearly', 'Compare renewal price, coverage, and payment deadline.'),
+    'warranty': _ReminderPreset('Documents & renewals', OccasionType.custom, 'Warranty expiry', 'Warranty', 'none', 'Check whether repair, replacement, or extended warranty action is needed.'),
+    'vehicle': _ReminderPreset('Home maintenance', OccasionType.custom, 'Vehicle service', 'Vehicle', 'none', 'Book service, check insurance/registration, and note mileage.'),
+    'home': _ReminderPreset('Home maintenance', OccasionType.custom, 'Home maintenance', 'Home', 'none', 'Book service and check supplies or spare parts.'),
+    'bill': _ReminderPreset('Subscriptions & bills', OccasionType.custom, 'Bill due', 'Bills', 'monthly', 'Pay before the due date and keep confirmation.'),
+    'subscription': _ReminderPreset('Subscriptions & bills', OccasionType.custom, 'Subscription renewal', 'Subscription', 'monthly', 'Review usage and cancel or renew before billing.'),
+    'gift': _ReminderPreset('Gift planning', OccasionType.custom, 'Buy gift', 'Gift', 'none', 'Pick gift, confirm address, and order early.'),
+    'job': _ReminderPreset('Job search', OccasionType.custom, 'Job follow-up', 'Job search', 'none', 'Follow up politely with context and next step.'),
+    'family': _ReminderPreset('Family care', OccasionType.custom, 'Family care check-in', 'Family', 'none', 'Call, message, or check if anything is needed.'),
   };
 
   @override
@@ -84,6 +99,24 @@ class _OccasionFormState extends State<OccasionForm> {
     });
   }
 
+  void _changePreset(String? presetKey) {
+    if (presetKey == null) return;
+    final preset = _presets[presetKey];
+    if (preset == null) {
+      setState(() => _preset = '');
+      return;
+    }
+    setState(() {
+      _preset = presetKey;
+      _module = preset.module;
+      _type = preset.type;
+      _title.text = preset.title;
+      _relationship.text = preset.relationship;
+      _repeat = preset.repeat;
+      _notes.text = preset.notes;
+    });
+  }
+
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(
@@ -93,6 +126,7 @@ class _OccasionFormState extends State<OccasionForm> {
         title: _title.text.trim(),
         personName: _personName.text.trim(),
         type: _type,
+        year: _date.year,
         month: _date.month,
         day: _date.day,
         module: _module,
@@ -120,10 +154,33 @@ class _OccasionFormState extends State<OccasionForm> {
               Text('What do you want to remember?', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
+                key: ValueKey(_module),
                 initialValue: _module,
                 decoration: const InputDecoration(labelText: 'Module', prefixIcon: Icon(Icons.dashboard_customize_outlined)),
                 items: _moduleDefaults.keys.map((module) => DropdownMenuItem(value: module, child: Text(module))).toList(),
                 onChanged: _changeModule,
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                key: ValueKey(_preset),
+                initialValue: _preset,
+                decoration: const InputDecoration(labelText: 'Quick preset', prefixIcon: Icon(Icons.bolt_outlined)),
+                items: const [
+                  DropdownMenuItem(value: '', child: Text('Choose a preset, or fill manually')),
+                  DropdownMenuItem(value: 'passport', child: Text('Passport renewal')),
+                  DropdownMenuItem(value: 'visa', child: Text('Visa / permit renewal')),
+                  DropdownMenuItem(value: 'license', child: Text('Driver license renewal')),
+                  DropdownMenuItem(value: 'insurance', child: Text('Insurance renewal')),
+                  DropdownMenuItem(value: 'warranty', child: Text('Warranty expiry')),
+                  DropdownMenuItem(value: 'vehicle', child: Text('Vehicle service')),
+                  DropdownMenuItem(value: 'home', child: Text('Home maintenance')),
+                  DropdownMenuItem(value: 'bill', child: Text('Monthly bill')),
+                  DropdownMenuItem(value: 'subscription', child: Text('Subscription renewal')),
+                  DropdownMenuItem(value: 'gift', child: Text('Gift to buy')),
+                  DropdownMenuItem(value: 'job', child: Text('Job follow-up')),
+                  DropdownMenuItem(value: 'family', child: Text('Family care check-in')),
+                ],
+                onChanged: _changePreset,
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<OccasionType>(
@@ -136,8 +193,8 @@ class _OccasionFormState extends State<OccasionForm> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _title,
-                decoration: const InputDecoration(labelText: 'Occasion title', hintText: 'Birthday, wedding anniversary, Diwali…', prefixIcon: Icon(Icons.celebration_outlined)),
-                validator: (value) => value == null || value.trim().isEmpty ? 'Add an occasion title' : null,
+                decoration: const InputDecoration(labelText: 'Title', hintText: 'Birthday, passport renewal, phone bill…', prefixIcon: Icon(Icons.celebration_outlined)),
+                validator: (value) => value == null || value.trim().isEmpty ? 'Add a title' : null,
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -201,17 +258,28 @@ class _OccasionFormState extends State<OccasionForm> {
                 controller: _defaultMessage,
                 maxLines: 3,
                 decoration: const InputDecoration(
-                  labelText: 'Default message (optional)',
-                  hintText: 'Use this exact draft when preparing this occasion',
+                  labelText: 'Default message/action text (optional)',
+                  hintText: 'Use this exact draft when preparing this reminder',
                   prefixIcon: Icon(Icons.message_outlined),
                 ),
               ),
               const SizedBox(height: 28),
-              FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: const Text('Save occasion')),
+              FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: const Text('Save reminder')),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _ReminderPreset {
+  const _ReminderPreset(this.module, this.type, this.title, this.relationship, this.repeat, this.notes);
+
+  final String module;
+  final OccasionType type;
+  final String title;
+  final String relationship;
+  final String repeat;
+  final String notes;
 }

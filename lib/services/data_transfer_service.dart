@@ -53,6 +53,7 @@ class DataTransferService {
       title: _string(row['title']).isEmpty ? type.defaultTitle : _string(row['title']),
       personName: _string(row['person']).isEmpty ? _string(row['personName']) : _string(row['person']),
       type: type,
+      year: date.year,
       month: date.month,
       day: date.day,
       module: module.isEmpty ? _defaultModule(type) : module,
