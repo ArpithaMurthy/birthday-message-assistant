@@ -82,6 +82,9 @@
     details.card summary::after { content: "＋"; color: var(--cp-accent); font-size: 1.25rem; }
     details.card[open] summary::after { content: "−"; }
     details.card form { padding: 0 20px 20px; }
+    details.advanced { border: 1px solid var(--cp-border); border-radius: 12px; padding: 0; }
+    details.advanced summary { padding: 12px; cursor: pointer; color: var(--cp-accent); font-weight: 700; }
+    details.advanced .advanced-body { display: grid; gap: 14px; padding: 0 12px 12px; }
     form { display: grid; gap: 14px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     label { display: grid; gap: 6px; font-size: 0.875rem; color: var(--cp-text-muted); }
@@ -124,27 +127,28 @@
     <details class="card" id="add-panel">
       <summary>Add reminder</summary>
       <form id="occasion-form">
-        <label>Module<select id="module"><option>Occasions</option><option>Documents & renewals</option><option>Visa & admin</option><option>Home maintenance</option><option>Subscriptions & bills</option><option>Gift planning</option><option>Job search</option><option>Family care</option></select></label>
         <label>Quick preset<select id="preset"><option value="">Choose a preset, or fill manually</option><option value="passport">Passport renewal</option><option value="visa">Visa / permit renewal</option><option value="license">Driver license renewal</option><option value="insurance">Insurance renewal</option><option value="warranty">Warranty expiry</option><option value="vehicle">Vehicle service</option><option value="home">Home maintenance</option><option value="bill">Monthly bill</option><option value="subscription">Subscription renewal</option><option value="gift">Gift to buy</option><option value="job">Job follow-up</option><option value="family">Family care check-in</option></select></label>
-        <div class="grid">
-          <label>Type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option><option>Renewal</option><option>Bill</option><option>Task</option><option>Follow-up</option></select></label>
-          <label>Date or deadline<input id="date" type="date" required></label>
-        </div>
+        <label>Date or deadline<input id="date" type="date" required></label>
         <label>Title<input id="title" value="Birthday" required maxlength="100"></label>
-        <div class="grid">
-          <label>Person or group (optional)<input id="person" placeholder="Maya, Mum and Dad, Team…" maxlength="80"></label>
-          <label>Relationship/category (optional)<input id="relationship" placeholder="Friend, passport, home, subscription…" maxlength="80"></label>
-        </div>
-        <div class="grid">
-          <label>Preferred channel<select id="channel"><option>Share</option><option>WhatsApp</option><option>LINE</option><option>SMS</option></select></label>
-          <label>Phone number (optional)<input id="phone" type="tel" placeholder="+886..." maxlength="40"></label>
-        </div>
-        <div class="grid">
-          <label>Repeat<select id="repeat"><option value="yearly">Yearly</option><option value="monthly">Monthly</option><option value="none">One time</option></select></label>
-          <label>Action link (optional)<input id="action-url" type="url" placeholder="https://..." maxlength="240"></label>
-        </div>
+        <label>Person or group (optional)<input id="person" placeholder="Maya, passport, phone bill…" maxlength="80"></label>
         <label>Note (optional)<textarea id="notes" placeholder="A memory, document detail, renewal note, or next action"></textarea></label>
-        <label>Default message/action text (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this item"></textarea></label>
+        <details class="advanced">
+          <summary>Advanced details</summary>
+          <div class="advanced-body">
+            <label>Module<select id="module"><option>Occasions</option><option>Documents & renewals</option><option>Visa & admin</option><option>Home maintenance</option><option>Subscriptions & bills</option><option>Gift planning</option><option>Job search</option><option>Family care</option></select></label>
+            <div class="grid">
+              <label>Type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option><option>Renewal</option><option>Bill</option><option>Task</option><option>Follow-up</option></select></label>
+              <label>Repeat<select id="repeat"><option value="yearly">Yearly</option><option value="monthly">Monthly</option><option value="none">One time</option></select></label>
+            </div>
+            <label>Relationship/category (optional)<input id="relationship" placeholder="Friend, passport, home, subscription…" maxlength="80"></label>
+            <div class="grid">
+              <label>Preferred channel<select id="channel"><option>Share</option><option>WhatsApp</option><option>LINE</option><option>SMS</option></select></label>
+              <label>Phone number (optional)<input id="phone" type="tel" placeholder="+886..." maxlength="40"></label>
+            </div>
+            <label>Action link (optional)<input id="action-url" type="url" placeholder="https://..." maxlength="240"></label>
+            <label>Default message/action text (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this item"></textarea></label>
+          </div>
+        </details>
         <button class="primary" type="submit">Save reminder</button>
       </form>
     </details>

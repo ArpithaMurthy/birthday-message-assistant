@@ -159,10 +159,10 @@ class _HomeScreenState extends State<HomeScreen> {
               PopupMenuItem(value: 'backup', child: Text('Export backup')),
             ],
           ),
-          IconButton(onPressed: _addOccasion, tooltip: 'Add occasion', icon: const Icon(Icons.add_circle_outline)),
+          IconButton(onPressed: _addOccasion, tooltip: 'Add reminder', icon: const Icon(Icons.add_circle_outline)),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(onPressed: _addOccasion, icon: const Icon(Icons.add), label: const Text('Add occasion')),
+      floatingActionButton: FloatingActionButton.extended(onPressed: _addOccasion, icon: const Icon(Icons.add), label: const Text('Add reminder')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _occasions.isEmpty

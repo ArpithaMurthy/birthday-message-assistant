@@ -144,7 +144,7 @@ class _OccasionFormState extends State<OccasionForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add an occasion')),
+      appBar: AppBar(title: const Text('Add reminder')),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -153,14 +153,6 @@ class _OccasionFormState extends State<OccasionForm> {
             children: [
               Text('What do you want to remember?', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                key: ValueKey(_module),
-                initialValue: _module,
-                decoration: const InputDecoration(labelText: 'Module', prefixIcon: Icon(Icons.dashboard_customize_outlined)),
-                items: _moduleDefaults.keys.map((module) => DropdownMenuItem(value: module, child: Text(module))).toList(),
-                onChanged: _changeModule,
-              ),
-              const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 key: ValueKey(_preset),
                 initialValue: _preset,
@@ -183,12 +175,14 @@ class _OccasionFormState extends State<OccasionForm> {
                 onChanged: _changePreset,
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<OccasionType>(
-                key: ValueKey(_type),
-                initialValue: _type,
-                decoration: const InputDecoration(labelText: 'Type', prefixIcon: Icon(Icons.event_outlined)),
-                items: OccasionType.values.map((type) => DropdownMenuItem(value: type, child: Text(type.label))).toList(),
-                onChanged: _changeType,
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant), borderRadius: BorderRadius.circular(14)),
+                leading: const Icon(Icons.calendar_month_outlined),
+                title: const Text('Date'),
+                subtitle: Text('${_date.day}/${_date.month}/${_date.year}'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _chooseDate,
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -199,69 +193,81 @@ class _OccasionFormState extends State<OccasionForm> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _personName,
-                decoration: const InputDecoration(labelText: 'Person or group (optional)', hintText: 'Maya, Mum and Dad, Team…', prefixIcon: Icon(Icons.person_outline)),
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _relationship,
-                decoration: const InputDecoration(labelText: 'Relationship/category (optional)', hintText: 'Friend, passport, home, subscription…', prefixIcon: Icon(Icons.favorite_border)),
-              ),
-              const SizedBox(height: 14),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant), borderRadius: BorderRadius.circular(14)),
-                leading: const Icon(Icons.calendar_month_outlined),
-                title: const Text('Date'),
-                subtitle: Text('${_date.day}/${_date.month}'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _chooseDate,
-              ),
-              const SizedBox(height: 14),
-              DropdownButtonFormField<MessageChannel>(
-                initialValue: _channel,
-                decoration: const InputDecoration(labelText: 'Preferred channel', prefixIcon: Icon(Icons.send_outlined)),
-                items: MessageChannel.values.map((channel) => DropdownMenuItem(value: channel, child: Text(channel.label))).toList(),
-                onChanged: (value) => setState(() => _channel = value!),
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _phone,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone number (optional)', hintText: 'Include country code for WhatsApp', prefixIcon: Icon(Icons.phone_outlined)),
-              ),
-              const SizedBox(height: 14),
-              DropdownButtonFormField<String>(
-                key: ValueKey(_repeat),
-                initialValue: _repeat,
-                decoration: const InputDecoration(labelText: 'Repeat', prefixIcon: Icon(Icons.repeat_outlined)),
-                items: const [
-                  DropdownMenuItem(value: 'yearly', child: Text('Yearly')),
-                  DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
-                  DropdownMenuItem(value: 'none', child: Text('One time')),
-                ],
-                onChanged: (value) => setState(() => _repeat = value ?? 'none'),
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _actionUrl,
-                keyboardType: TextInputType.url,
-                decoration: const InputDecoration(labelText: 'Action link (optional)', hintText: 'https://...', prefixIcon: Icon(Icons.link_outlined)),
+                decoration: const InputDecoration(labelText: 'Person or item (optional)', hintText: 'Maya, passport, phone bill…', prefixIcon: Icon(Icons.person_outline)),
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _notes,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Personal note (optional)', hintText: 'A memory or detail to mention', prefixIcon: Icon(Icons.edit_note)),
+                decoration: const InputDecoration(labelText: 'Note (optional)', hintText: 'Memory, document detail, or next action', prefixIcon: Icon(Icons.edit_note)),
               ),
               const SizedBox(height: 14),
-              TextFormField(
-                controller: _defaultMessage,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Default message/action text (optional)',
-                  hintText: 'Use this exact draft when preparing this reminder',
-                  prefixIcon: Icon(Icons.message_outlined),
-                ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: const Text('Advanced details'),
+                children: [
+                  DropdownButtonFormField<String>(
+                    key: ValueKey(_module),
+                    initialValue: _module,
+                    decoration: const InputDecoration(labelText: 'Module', prefixIcon: Icon(Icons.dashboard_customize_outlined)),
+                    items: _moduleDefaults.keys.map((module) => DropdownMenuItem(value: module, child: Text(module))).toList(),
+                    onChanged: _changeModule,
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<OccasionType>(
+                    key: ValueKey(_type),
+                    initialValue: _type,
+                    decoration: const InputDecoration(labelText: 'Type', prefixIcon: Icon(Icons.event_outlined)),
+                    items: OccasionType.values.map((type) => DropdownMenuItem(value: type, child: Text(type.label))).toList(),
+                    onChanged: _changeType,
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _relationship,
+                    decoration: const InputDecoration(labelText: 'Relationship/category (optional)', hintText: 'Friend, passport, home, subscription…', prefixIcon: Icon(Icons.favorite_border)),
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<MessageChannel>(
+                    initialValue: _channel,
+                    decoration: const InputDecoration(labelText: 'Preferred channel', prefixIcon: Icon(Icons.send_outlined)),
+                    items: MessageChannel.values.map((channel) => DropdownMenuItem(value: channel, child: Text(channel.label))).toList(),
+                    onChanged: (value) => setState(() => _channel = value!),
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _phone,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(labelText: 'Phone number (optional)', hintText: 'Include country code for WhatsApp', prefixIcon: Icon(Icons.phone_outlined)),
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<String>(
+                    key: ValueKey(_repeat),
+                    initialValue: _repeat,
+                    decoration: const InputDecoration(labelText: 'Repeat', prefixIcon: Icon(Icons.repeat_outlined)),
+                    items: const [
+                      DropdownMenuItem(value: 'yearly', child: Text('Yearly')),
+                      DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                      DropdownMenuItem(value: 'none', child: Text('One time')),
+                    ],
+                    onChanged: (value) => setState(() => _repeat = value ?? 'none'),
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _actionUrl,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(labelText: 'Action link (optional)', hintText: 'https://...', prefixIcon: Icon(Icons.link_outlined)),
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _defaultMessage,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Default message/action text (optional)',
+                      hintText: 'Use this exact draft when preparing this reminder',
+                      prefixIcon: Icon(Icons.message_outlined),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 28),
               FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: const Text('Save reminder')),

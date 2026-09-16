@@ -8,9 +8,11 @@ Remember important people, renewals, bills, gifts, home tasks, and admin deadlin
 
 The app deliberately does **not** send messages automatically. It prepares an editable draft or action note and opens SMS, WhatsApp, LINE, a saved action link, or the system share sheet. The user reviews and presses Send or completes the action.
 
+The main add flow stays intentionally small: choose a quick preset, pick a date, add a title, optionally add a person/item and note, then save. Module, repeat, channel, phone, action link, and default message are available under **Advanced details** when needed.
+
 ## What the personal MVP includes
 
-1. Add birthdays, anniversaries, renewals, visa/admin deadlines, home maintenance, bills, gifts, job-search follow-ups, family-care tasks, or custom reminders.
+1. Add birthdays, anniversaries, renewals, visa/admin deadlines, home maintenance, bills, gifts, job-search follow-ups, family-care tasks, or custom reminders from quick presets.
 2. See the next occurrence and a human-friendly countdown.
 3. Receive local reminders 7 days, 1 day, and the morning of the occasion—even when the app is closed.
 4. Start from warm, playful, short, formal, or saved default message/action templates.
