@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:moments_remembered/models/occasion.dart';
 import 'package:moments_remembered/services/data_transfer_service.dart';
 
 class ImportOccasionsScreen extends StatefulWidget {
