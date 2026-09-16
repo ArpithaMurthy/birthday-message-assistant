@@ -23,6 +23,25 @@ The app deliberately does **not** send messages automatically. It prepares an ed
 
 Open [web-lite/index.html](web-lite/index.html) in a browser or deploy that folder as a static website. It stores occasions only in that browser and can download a recurring calendar file. Importing the file into the phone's calendar provides closed-browser reminders without an App Store download or notification server.
 
+## Deploy Web Lite for anyone to use
+
+The repository includes a GitHub Pages workflow at `.github/workflows/deploy-web-lite.yml` that publishes only the static `web-lite/` folder. The deployed app stores each user's occasions in that user's browser `localStorage`; there is no server account, database, analytics SDK, or contact upload.
+
+To deploy:
+
+1. Push the repository to GitHub.
+2. In GitHub, open **Settings > Pages**.
+3. Set **Build and deployment > Source** to **GitHub Actions**.
+4. Run the **Deploy Web Lite** workflow manually, or push a change under `web-lite/`.
+
+For a public repository, the app URL is:
+
+```text
+https://ArpithaMurthy.github.io/birthday-message-assistant/
+```
+
+If the repository stays private, confirm your GitHub plan and Pages visibility settings support public access. If you need a guaranteed public URL while keeping the repo private, deploy `web-lite/` to a static host such as Azure Static Web Apps, Netlify, Vercel, or Cloudflare Pages.
+
 ## Moving to another laptop
 
 Follow [docs/SETUP_AND_VERIFICATION.md](docs/SETUP_AND_VERIFICATION.md) for the complete clone, Android SDK, build, phone-testing, iPhone/Web Lite, and Docker workflow.

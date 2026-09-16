@@ -44,6 +44,8 @@ void main() {
     final calendar = CalendarService().buildCalendar([birthday]);
     expect(calendar, contains('RRULE:FREQ=YEARLY'));
     expect(calendar, contains('SUMMARY:Birthday — Ada Lovelace'));
-    expect(calendar, contains('BEGIN:VALARM'));
+    expect(calendar, contains('TRIGGER:-P7D'));
+    expect(calendar, contains('TRIGGER:-P1D'));
+    expect(calendar, contains('TRIGGER:PT9H'));
   });
 }

@@ -20,10 +20,14 @@ class NotificationService {
     final androidGranted = await _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
+    if (androidGranted != null) return androidGranted;
+
     final iosGranted = await _plugin
         .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(alert: true, badge: true, sound: true);
-    return androidGranted ?? iosGranted ?? false;
+    if (iosGranted != null) return iosGranted;
+
+    return true;
   }
 
   Future<void> rescheduleAll(List<Occasion> occasions) async {

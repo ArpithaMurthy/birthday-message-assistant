@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#b11f4b">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E">
   <title>Moments Remembered</title>
   <script>
     (() => {
@@ -189,8 +190,12 @@
     function esc(value) { return value.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
     $('export').addEventListener('click', () => {
       const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-      const events = occasions.map((item) => { const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`; return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`,'RRULE:FREQ=YEARLY',`SUMMARY:${esc(summary)}`,'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM','BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM','END:VEVENT'].join('\r\n'); }).join('\r\n');
-      const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Moments Remembered//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR\r\n`, url = URL.createObjectURL(new Blob([content], { type: 'text/calendar' })), link = document.createElement('a'); link.href = url; link.download = 'moments-remembered.ics'; link.click(); URL.revokeObjectURL(url);
+      const alarm = (trigger, summary) => ['BEGIN:VALARM',`TRIGGER:${trigger}`,'ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM'];
+      const events = occasions.map((item) => {
+        const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`;
+        return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`,'RRULE:FREQ=YEARLY',`SUMMARY:${esc(summary)}`,...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].join('\r\n');
+      }).join('\r\n');
+      const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Moments Remembered//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR\r\n`, url = URL.createObjectURL(new Blob([content], { type: 'text/calendar' })), link = document.createElement('a'); link.href = url; link.download = 'moments-remembered.ics'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
     $('date').value = new Date().toISOString().slice(0,10); render();
   </script>

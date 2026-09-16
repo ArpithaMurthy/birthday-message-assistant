@@ -45,7 +45,7 @@ class CalendarService {
         if (occasion.notes.trim().isNotEmpty) 'DESCRIPTION:${_escape(occasion.notes.trim())}',
         ...occasion.reminderDays.expand((days) => [
               'BEGIN:VALARM',
-              'TRIGGER:-P${days == 0 ? 'T0M' : '${days}D'}',
+              'TRIGGER:${days == 0 ? 'PT9H' : '-P${days}D'}',
               'ACTION:DISPLAY',
               'DESCRIPTION:${_escape(occasion.calendarTitle)}',
               'END:VALARM',
