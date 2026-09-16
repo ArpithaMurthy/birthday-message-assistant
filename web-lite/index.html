@@ -224,7 +224,24 @@
     });
     function downloadFile(name, type, content) { const url = URL.createObjectURL(new Blob([content], { type })), link = document.createElement('a'); link.href = url; link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     function parseCsv(text) {
-      const rows = text.trim().split(/\r?\n/).map((line) => line.split(',').map((cell) => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')));
+      const rows = [];
+      let row = [], cell = '', quoted = false;
+      for (let index = 0; index < text.length; index += 1) {
+        const char = text[index], next = text[index + 1];
+        if (char === '"' && quoted && next === '"') { cell += '"'; index += 1; continue; }
+        if (char === '"') { quoted = !quoted; continue; }
+        if (char === ',' && !quoted) { row.push(cell.trim()); cell = ''; continue; }
+        if ((char === '\n' || char === '\r') && !quoted) {
+          if (char === '\r' && next === '\n') index += 1;
+          row.push(cell.trim()); cell = '';
+          if (row.some(Boolean)) rows.push(row);
+          row = [];
+          continue;
+        }
+        cell += char;
+      }
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
       const headers = rows.shift().map((header) => header.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''));
       return rows.map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] || ''])));
     }
