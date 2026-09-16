@@ -126,6 +126,10 @@
           <label>Person or group (optional)<input id="person" placeholder="Maya, Mum and Dad, Team…" maxlength="80"></label>
           <label>Relationship (optional)<input id="relationship" placeholder="Friend, sister, colleague…" maxlength="80"></label>
         </div>
+        <div class="grid">
+          <label>Preferred channel<select id="channel"><option>Share</option><option>WhatsApp</option><option>LINE</option><option>SMS</option></select></label>
+          <label>Phone number (optional)<input id="phone" type="tel" placeholder="+886..." maxlength="40"></label>
+        </div>
         <label>Personal note (optional)<textarea id="notes" placeholder="A memory or detail to mention"></textarea></label>
         <label>Default message (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this occasion"></textarea></label>
         <button class="primary" type="submit">Save occasion</button>
@@ -143,7 +147,11 @@
       <p class="muted">Edit every word. Nothing is sent automatically.</p>
       <label>Your message<textarea id="message"></textarea></label>
       <div class="actions" style="margin-top:16px">
-        <button class="primary" id="share-message" type="button">Share message</button>
+        <button class="primary" id="share-message" type="button">Share</button>
+        <button class="secondary" id="whatsapp-message" type="button">WhatsApp</button>
+        <button class="secondary" id="line-message" type="button">LINE</button>
+        <button class="secondary" id="sms-message" type="button">SMS</button>
+        <button class="secondary" id="copy-message" type="button">Copy</button>
         <button class="secondary" id="close-message" type="button">Close</button>
       </div>
     </section>
@@ -153,7 +161,7 @@
     const key = 'moments-remembered.occasions.v1';
     const $ = (id) => document.getElementById(id);
     let occasions = normalizeOccasions(JSON.parse(localStorage.getItem(key) || '[]'));
-    let activeMessage = '';
+    let activeOccasion = null;
     const type = $('type');
     const titles = { Birthday: 'Birthday', Anniversary: 'Anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion' };
     type.addEventListener('change', () => { $('title').value = titles[type.value]; if (type.value === 'New Year') $('date').value = `${new Date().getFullYear()}-01-01`; });
@@ -168,7 +176,7 @@
     function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
     function normalizeOccasions(values) {
       const list = Array.isArray(values) ? values : values.occasions || [];
-      return list.filter(Boolean).map((item) => ({ id: item.id || crypto.randomUUID(), type: item.type || 'Birthday', title: item.title || item.type || 'Birthday', date: item.date, person: item.person || item.personName || '', relationship: item.relationship || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' })).filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
+      return list.filter(Boolean).map((item) => ({ id: item.id || crypto.randomUUID(), type: item.type || 'Birthday', title: item.title || item.type || 'Birthday', date: item.date, person: item.person || item.personName || '', relationship: item.relationship || '', channel: item.channel || 'Share', phone: item.phone || item.phoneNumber || item.whatsapp || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' })).filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
     }
     function save() { localStorage.setItem(key, JSON.stringify(occasions)); render(); }
     function setStatus(message) { $('status').textContent = message; }
@@ -186,21 +194,34 @@
       $('export-data').disabled = occasions.length === 0;
       $('occasions').innerHTML = occasions.length ? occasions.map((item) => {
         const date = nextDate(item.date), month = date.toLocaleString(undefined, { month: 'short' }), days = Math.round((date - new Date(new Date().setHours(0,0,0,0))) / 86400000);
-        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`}${item.defaultMessage ? ' · Default message saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare message</button></div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
+        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · ${escapeHtml(item.channel || 'Share')}${item.defaultMessage ? ' · Default message saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare message</button></div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
       }).join('') : '<div class="card empty"><h3>No occasions yet</h3><p class="muted">Add a birthday, anniversary, holiday, or custom moment above.</p></div>';
     }
     $('occasion-form').addEventListener('submit', (event) => {
       event.preventDefault();
-      occasions.push({ id: crypto.randomUUID(), type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
+      occasions.push({ id: crypto.randomUUID(), type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), channel: $('channel').value, phone: $('phone').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
       save(); event.target.reset(); type.value = 'Birthday'; $('title').value = 'Birthday'; setStatus('Occasion saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
     });
     $('occasions').addEventListener('click', (event) => {
       const id = event.target.dataset.id; if (!id) return;
       if (event.target.classList.contains('remove')) { occasions = occasions.filter((item) => item.id !== id); save(); setStatus('Occasion removed from this browser. Export and re-import the calendar if you previously imported this occasion.'); }
-      if (event.target.classList.contains('prepare')) { const item = occasions.find((value) => value.id === id); activeMessage = draft(item); $('message').value = activeMessage; $('message-dialog').showModal(); }
+      if (event.target.classList.contains('prepare')) { activeOccasion = occasions.find((value) => value.id === id); $('message').value = draft(activeOccasion); $('message-dialog').showModal(); }
     });
     $('close-message').addEventListener('click', () => $('message-dialog').close());
-    $('share-message').addEventListener('click', async () => { const text = $('message').value; if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); $('share-message').textContent = 'Copied'; } });
+    function cleanPhone(value) { return (value || '').replace(/[^\d+]/g, '').replace(/^\+/, ''); }
+    function messageText() { return $('message').value.trim(); }
+    function openUrl(url) { window.open(url, '_blank', 'noopener'); }
+    $('share-message').addEventListener('click', async () => { const text = messageText(); if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); $('share-message').textContent = 'Copied'; } });
+    $('copy-message').addEventListener('click', async () => { await navigator.clipboard.writeText(messageText()); $('copy-message').textContent = 'Copied'; });
+    $('whatsapp-message').addEventListener('click', () => {
+      const phone = cleanPhone(activeOccasion?.phone), text = encodeURIComponent(messageText());
+      openUrl(phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`);
+    });
+    $('line-message').addEventListener('click', () => openUrl(`https://line.me/R/share?text=${encodeURIComponent(messageText())}`));
+    $('sms-message').addEventListener('click', () => {
+      const phone = cleanPhone(activeOccasion?.phone), text = encodeURIComponent(messageText());
+      window.location.href = `sms:${phone}${navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad') ? '&' : '?'}body=${text}`;
+    });
     function downloadFile(name, type, content) { const url = URL.createObjectURL(new Blob([content], { type })), link = document.createElement('a'); link.href = url; link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     function parseCsv(text) {
       const rows = text.trim().split(/\r?\n/).map((line) => line.split(',').map((cell) => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')));

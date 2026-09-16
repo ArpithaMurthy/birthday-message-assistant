@@ -75,7 +75,16 @@ Birthday,Birthday,2026-09-20,Maya,Friend,Mention the hiking trip.,Happy birthday
 Anniversary,Wedding anniversary,2026-12-10,Ada and Sam,Family,,Happy anniversary Ada and Sam!
 ```
 
-Dates must use `YYYY-MM-DD`. If `defaultMessage` or `default_message` is present, **Prepare message** starts from that exact text; otherwise the app generates a simple draft from the occasion type, person, and notes.
+Dates must use `YYYY-MM-DD`. Optional fields include `channel` (`Share`, `WhatsApp`, `LINE`, or `SMS`) and `phone` for direct WhatsApp/SMS handoff. If `defaultMessage` or `default_message` is present, **Prepare message** starts from that exact text; otherwise the app generates a simple draft from the occasion type, person, and notes.
+
+The easiest user flow is:
+
+1. Import or add occasions once.
+2. Export and import the calendar so the phone reminds them.
+3. When reminded, open Web Lite, tap **Prepare message**, then tap **WhatsApp**, **LINE**, **SMS**, or **Share**.
+4. The selected app opens with the draft. The user reviews and presses Send.
+
+WhatsApp and SMS can use a saved phone number. LINE web sharing opens LINE with the message text, but the user still chooses the recipient; LINE does not provide a safe public web API for silently selecting a friend and sending.
 
 ## Moving to another laptop
 
