@@ -157,6 +157,16 @@ python scripts\launch_agent.py --mark-posted x
 
 The helper writes drafts to `launch_outbox/` and can open X/Reddit/Indie Hackers composer pages. You still review and press Post manually. `launch_outbox/` is gitignored because it is working state, not product code.
 
+You can also prepare launch drafts from any laptop or mobile browser without cloning the repo:
+
+1. Open the GitHub repository.
+2. Go to **Actions > Prepare Launch Posts**.
+3. Tap **Run workflow** and choose `all` or one channel.
+4. Open the generated GitHub issue.
+5. Use the composer links and copy blocks from that issue to post manually from whichever device is logged in.
+
+This workflow does not need or store X, Reddit, or Indie Hackers credentials. Keep those accounts logged in only in your own browser/app.
+
 Recommended channels for first validation:
 
 1. X from your existing account if it already has relevant followers.

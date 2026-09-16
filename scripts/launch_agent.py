@@ -112,6 +112,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare TinyTools launch posts without storing credentials.")
     parser.add_argument("--channel", choices=[*DRAFTS.keys(), "all"], default="all")
     parser.add_argument("--open", action="store_true", help="Open composer pages where the platform supports it.")
+    parser.add_argument("--markdown", default="", help="Write a portable launch checklist markdown file.")
     parser.add_argument("--mark-posted", choices=DRAFTS.keys(), help="Append a posted marker for a channel.")
     args = parser.parse_args()
 
@@ -131,6 +132,8 @@ def main() -> None:
         print(draft.body)
         if args.open:
             _open_draft(draft)
+    if args.markdown:
+        _write_markdown(selected, Path(args.markdown))
 
     print(f"\nDrafts written to {OUTBOX.resolve()}")
 
@@ -141,13 +144,44 @@ def _write_draft(draft: LaunchDraft) -> None:
 
 
 def _open_draft(draft: LaunchDraft) -> None:
+    webbrowser.open(_composer_url(draft))
+
+
+def _composer_url(draft: LaunchDraft) -> str:
     if draft.channel == "X":
-        webbrowser.open(f"{draft.url}?{urlencode({'text': draft.body})}")
-        return
+        return f"{draft.url}?{urlencode({'text': draft.body})}"
     if draft.channel.startswith("Reddit"):
-        webbrowser.open(f"{draft.url}?{urlencode({'title': draft.title, 'text': draft.body})}")
-        return
-    webbrowser.open(draft.url)
+        return f"{draft.url}?{urlencode({'title': draft.title, 'text': draft.body})}"
+    return draft.url
+
+
+def _write_markdown(drafts, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# TinyTools launch checklist",
+        "",
+        "Open this issue from any laptop or mobile browser. The links below prepare drafts where the platform supports it, but you still review and press Post manually.",
+        "",
+    ]
+    for draft in drafts:
+        lines.extend(
+            [
+                f"## {draft.channel}",
+                "",
+                f"- [ ] Posted",
+                f"- Composer: {_composer_url(draft)}",
+                "",
+                f"**Title**",
+                "",
+                draft.title,
+                "",
+                "**Body**",
+                "",
+                draft.body,
+                "",
+            ]
+        )
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def _mark_posted(draft: LaunchDraft) -> None:
