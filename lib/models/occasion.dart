@@ -88,12 +88,12 @@ class Occasion {
       }
       return candidate;
     }
-    var year = now.year;
-    var candidate = _safeDate(year);
+    var targetYear = now.year;
+    var candidate = _safeDate(targetYear);
     final today = DateTime(now.year, now.month, now.day);
     if (candidate.isBefore(today)) {
-      year += 1;
-      candidate = _safeDate(year);
+      targetYear += 1;
+      candidate = _safeDate(targetYear);
     }
     return candidate;
   }
@@ -181,8 +181,6 @@ class Occasion {
     );
   }
 }
-
-bool _isLeapYear(int year) => year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 
 MessageChannel _channelFromJson(Object? value) {
   final normalized = value?.toString().trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '') ?? '';
