@@ -47,7 +47,7 @@ class _ImportOccasionsScreenState extends State<ImportOccasionsScreen> {
               decoration: const InputDecoration(
                 labelText: 'CSV or JSON',
                 alignLabelWithHint: true,
-                hintText: 'type,title,date,person,relationship,channel,phone,notes,default_message\nBirthday,Birthday,Jan 9,Prashant,,WhatsApp,+886...,Happy memory,Happy birthday!',
+                hintText: 'module,type,title,date,person,relationship,channel,phone,repeat,action_url,notes,default_message\nOccasions,Birthday,Birthday,Jan 9,Prashant,,WhatsApp,+886...,yearly,,Happy memory,Happy birthday!\nDocuments & renewals,Renewal,Passport renewal,Oct 12,,,Share,,none,https://example.com,Check documents,',
               ),
             ),
             if (_error.isNotEmpty) ...[

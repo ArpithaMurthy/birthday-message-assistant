@@ -40,10 +40,13 @@ class Occasion {
     required this.month,
     required this.day,
     required this.channel,
+    this.module = 'Occasions',
     this.relationship = '',
     this.phoneNumber = '',
     this.notes = '',
     this.defaultMessage = '',
+    this.repeat = 'yearly',
+    this.actionUrl = '',
     this.reminderDays = const [7, 1, 0],
     this.lastHandledYear,
   });
@@ -54,11 +57,14 @@ class Occasion {
   final OccasionType type;
   final int month;
   final int day;
+  final String module;
   final String relationship;
   final MessageChannel channel;
   final String phoneNumber;
   final String notes;
   final String defaultMessage;
+  final String repeat;
+  final String actionUrl;
   final List<int> reminderDays;
   final int? lastHandledYear;
 
@@ -101,11 +107,14 @@ class Occasion {
       type: type,
       month: month,
       day: day,
+      module: module,
       relationship: relationship,
       channel: channel,
       phoneNumber: phoneNumber,
       notes: notes,
       defaultMessage: defaultMessage,
+      repeat: repeat,
+      actionUrl: actionUrl,
       reminderDays: reminderDays,
       lastHandledYear: clearHandledYear ? null : lastHandledYear ?? this.lastHandledYear,
     );
@@ -118,11 +127,14 @@ class Occasion {
         'type': type.name,
         'month': month,
         'day': day,
+        'module': module,
         'relationship': relationship,
         'channel': channel.name,
         'phoneNumber': phoneNumber,
         'notes': notes,
         'defaultMessage': defaultMessage,
+        'repeat': repeat,
+        'actionUrl': actionUrl,
         'reminderDays': reminderDays,
         'lastHandledYear': lastHandledYear,
       };
@@ -137,11 +149,14 @@ class Occasion {
       type: _occasionTypeFromJson(typeName),
       month: json['month']! as int,
       day: json['day']! as int,
+      module: (json['module'] as String?) ?? (json['category'] as String?) ?? _moduleFromType(typeName),
       relationship: (json['relationship'] as String?) ?? '',
       channel: _channelFromJson(json['channel']),
       phoneNumber: (json['phoneNumber'] as String?) ?? '',
       notes: (json['notes'] as String?) ?? '',
       defaultMessage: ((json['defaultMessage'] as String?) ?? (json['default_message'] as String?) ?? '').trim(),
+      repeat: (json['repeat'] as String?) ?? _repeatFromType(typeName),
+      actionUrl: ((json['actionUrl'] as String?) ?? (json['action_url'] as String?) ?? (json['url'] as String?) ?? '').trim(),
       reminderDays: ((json['reminderDays'] as List<Object?>?) ?? [7, 1, 0]).cast<int>(),
       lastHandledYear: json['lastHandledYear'] as int?,
     );
@@ -165,4 +180,12 @@ OccasionType _occasionTypeFromJson(String typeName) {
     if (value.name == typeName) return value;
   }
   return OccasionType.custom;
+}
+
+String _moduleFromType(String typeName) {
+  return {'birthday', 'anniversary', 'newYear', 'holiday', 'custom'}.contains(typeName) ? 'Occasions' : 'Life admin';
+}
+
+String _repeatFromType(String typeName) {
+  return {'birthday', 'anniversary', 'newYear', 'holiday'}.contains(typeName) ? 'yearly' : 'none';
 }

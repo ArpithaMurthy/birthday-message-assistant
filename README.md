@@ -1,20 +1,20 @@
-# Moments Remembered
+# TinyTools Life Admin
 
-A private, local-first occasion reminder and message companion for Android, iPhone, and the web.
+A private, local-first life-admin reminder companion for Android, iPhone, and the web.
 
 ## Product promise
 
-Remember important people, prepare something thoughtful, and follow through on time.
+Remember important people, renewals, bills, gifts, home tasks, and admin deadlines so you follow through on time.
 
-The app deliberately does **not** send messages automatically. It prepares an editable draft and opens SMS, WhatsApp, or the system share sheet. The user reviews and presses Send.
+The app deliberately does **not** send messages automatically. It prepares an editable draft or action note and opens SMS, WhatsApp, LINE, a saved action link, or the system share sheet. The user reviews and presses Send or completes the action.
 
 ## What the personal MVP includes
 
-1. Add birthdays, anniversaries, New Year, holidays, or custom occasions.
+1. Add birthdays, anniversaries, renewals, visa/admin deadlines, home maintenance, bills, gifts, job-search follow-ups, family-care tasks, or custom reminders.
 2. See the next occurrence and a human-friendly countdown.
 3. Receive local reminders 7 days, 1 day, and the morning of the occasion—even when the app is closed.
-4. Start from warm, playful, short, or formal message templates.
-5. Edit every word and open a messaging app for approval.
+4. Start from warm, playful, short, formal, or saved default message/action templates.
+5. Edit every word and open WhatsApp, LINE, SMS/iMessage, an action link, or the share sheet for approval.
 6. Mark the occasion handled to prevent accidental duplicate follow-up.
 7. Keep all personal data on the phone. There is no account, server, advertising SDK, analytics SDK, or contact upload.
 8. Export a recurring `.ics` calendar containing reminders for Apple Calendar, Google Calendar, or Outlook.
@@ -44,7 +44,7 @@ https://ArpithaMurthy.github.io/birthday-message-assistant/
 
 If the repository stays private, confirm your GitHub plan and Pages visibility settings support public access. If you need a guaranteed public URL while keeping the repo private, deploy `web-lite/` to a static host such as Azure Static Web Apps, Netlify, Vercel, or Cloudflare Pages.
 
-## Add your people, occasions, and default messages
+## Add your people, reminders, and default messages
 
 Web Lite is login-free by design. Use **Import data** to load a local JSON or CSV file; the file is read in the browser and is not uploaded to a server. Use **Export data** to back up or move the same browser-local list to another device.
 
@@ -55,11 +55,16 @@ JSON format:
   "schemaVersion": 1,
   "occasions": [
     {
+      "module": "Occasions",
       "type": "Birthday",
       "title": "Birthday",
       "date": "2026-09-20",
       "person": "Maya",
       "relationship": "Friend",
+      "channel": "WhatsApp",
+      "phone": "+886912345678",
+      "repeat": "yearly",
+      "actionUrl": "",
       "notes": "Mention the hiking trip.",
       "defaultMessage": "Happy birthday, Maya! Hope your day is full of joy."
     }
@@ -70,12 +75,13 @@ JSON format:
 CSV format:
 
 ```csv
-type,title,date,person,relationship,notes,default_message
-Birthday,Birthday,2026-09-20,Maya,Friend,Mention the hiking trip.,Happy birthday Maya!
-Anniversary,Wedding anniversary,2026-12-10,Ada and Sam,Family,,Happy anniversary Ada and Sam!
+module,type,title,date,person,relationship,channel,phone,repeat,action_url,notes,default_message
+Occasions,Birthday,Birthday,2026-09-20,Maya,Friend,WhatsApp,+886912345678,yearly,,Mention the hiking trip.,Happy birthday Maya!
+Documents & renewals,Renewal,Passport renewal,Oct 12,,Passport,Share,,none,https://example.com/passport,Check required documents.,
+Subscriptions & bills,Bill,Phone bill,1/9,,Bills,Share,,monthly,,Pay before due date.,
 ```
 
-Dates must use `YYYY-MM-DD`. Optional fields include `channel` (`Share`, `WhatsApp`, `LINE`, or `SMS`) and `phone` for direct WhatsApp/SMS handoff. If `defaultMessage` or `default_message` is present, **Prepare message** starts from that exact text; otherwise the app generates a simple draft from the occasion type, person, and notes.
+Dates may use `YYYY-MM-DD`, `Jan 9`, `9 Jan`, `Dec 11th`, or `7/12`. Optional fields include `module`, `channel` (`Share`, `WhatsApp`, `LINE`, or `SMS`), `phone`, `repeat` (`yearly`, `monthly`, or `none`), and `action_url`. If `defaultMessage` or `default_message` is present, **Prepare** starts from that exact text; otherwise the app generates a simple draft from the reminder type, person, and notes.
 
 The easiest user flow is:
 

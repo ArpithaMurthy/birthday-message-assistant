@@ -44,9 +44,10 @@ class DataTransferService {
   }
 
   Occasion? _occasionFromRow(Map<String, Object?> row) {
-    final date = _parseDate(row['date']);
+    final date = _parseDate(row['date'] ?? row['deadline']);
     if (date == null) return null;
     final type = _type(row['type']);
+    final module = _string(row['module']).isEmpty ? _string(row['category']) : _string(row['module']);
     return Occasion(
       id: _string(row['id']).isEmpty ? _uuid.v4() : _string(row['id']),
       title: _string(row['title']).isEmpty ? type.defaultTitle : _string(row['title']),
@@ -54,11 +55,16 @@ class DataTransferService {
       type: type,
       month: date.month,
       day: date.day,
+      module: module.isEmpty ? _defaultModule(type) : module,
       relationship: _string(row['relationship']),
       channel: _channel(row['channel']),
       phoneNumber: _string(row['phone']).isEmpty ? _string(row['phoneNumber']) : _string(row['phone']),
       notes: _string(row['notes']),
       defaultMessage: _string(row['defaultMessage']).isEmpty ? _string(row['default_message']) : _string(row['defaultMessage']),
+      repeat: _repeat(row['repeat'], type),
+      actionUrl: _string(row['actionUrl']).isEmpty
+          ? (_string(row['action_url']).isEmpty ? _string(row['url']) : _string(row['action_url']))
+          : _string(row['actionUrl']),
     );
   }
 
@@ -140,6 +146,31 @@ class DataTransferService {
       'sms' || 'imessage' || 'smsimessage' => MessageChannel.sms,
       _ => MessageChannel.share,
     };
+  }
+
+  String _repeat(Object? value, OccasionType type) {
+    final normalized = _normalizeHeader(_string(value)).replaceAll('_', '');
+    if (normalized == 'monthly') return 'monthly';
+    if (normalized == 'none' || normalized == 'onetime' || normalized == 'once') return 'none';
+    return {
+      OccasionType.birthday,
+      OccasionType.anniversary,
+      OccasionType.newYear,
+      OccasionType.holiday,
+    }.contains(type)
+        ? 'yearly'
+        : 'none';
+  }
+
+  String _defaultModule(OccasionType type) {
+    return {
+      OccasionType.birthday,
+      OccasionType.anniversary,
+      OccasionType.newYear,
+      OccasionType.holiday,
+    }.contains(type)
+        ? 'Occasions'
+        : 'Life admin';
   }
 
   List<List<String>> _parseCsv(String text) {

@@ -7,6 +7,12 @@ class MessageService {
     if (occasion.defaultMessage.trim().isNotEmpty) {
       return occasion.defaultMessage.trim();
     }
+    if (occasion.module != 'Occasions') {
+      final date = '${occasion.day.toString().padLeft(2, '0')}/${occasion.month.toString().padLeft(2, '0')}';
+      final owner = occasion.personName.trim().isEmpty ? '' : ' for ${occasion.personName.trim()}';
+      final suffix = occasion.notes.trim().isEmpty ? '' : ' ${occasion.notes.trim()}';
+      return 'Reminder: ${occasion.title}$owner is coming up on $date.$suffix';
+    }
     final recipient = occasion.personName.trim().isEmpty ? '' : ', ${occasion.personName.trim().split(RegExp(r'\s+')).first}';
     final memory = occasion.notes.trim();
     final suffix = memory.isEmpty ? '' : ' $memory';

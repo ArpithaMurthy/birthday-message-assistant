@@ -66,6 +66,28 @@ void main() {
     expect(calendar, contains('TRIGGER:PT9H'));
   });
 
+  test('exports one-time admin reminders without yearly recurrence', () {
+    const renewal = Occasion(
+      id: 'passport',
+      title: 'Passport renewal',
+      personName: '',
+      type: OccasionType.custom,
+      module: 'Documents & renewals',
+      month: 10,
+      day: 12,
+      channel: MessageChannel.share,
+      repeat: 'none',
+      actionUrl: 'https://example.com/passport',
+      notes: 'Check required documents.',
+    );
+
+    final calendar = CalendarService().buildCalendar([renewal]);
+
+    expect(calendar, contains('SUMMARY:Passport renewal'));
+    expect(calendar, contains('URL:https://example.com/passport'));
+    expect(calendar, isNot(contains('RRULE:FREQ=YEARLY')));
+  });
+
   test('imports CSV with friendly dates and channels', () {
     final occasions = DataTransferService().importText('''
 type,title,date,person,relationship,channel,phone,notes,default_message
@@ -81,6 +103,37 @@ Birthday,Birthday,7/12,Anvay,,Share,,,
     expect(occasions.first.defaultMessage, 'Happy birthday Prashant!');
     expect(occasions[1].type, OccasionType.anniversary);
     expect(occasions[1].channel, MessageChannel.line);
+  });
+
+  test('imports life admin CSV rows with module repeat deadline and action link', () {
+    final occasions = DataTransferService().importText('''
+module,type,title,deadline,person,relationship,channel,repeat,action_url,notes
+Documents & renewals,Renewal,Passport renewal,Oct 12,,Passport,Share,none,https://example.com/passport,Check required documents.
+Subscriptions & bills,Bill,Phone bill,1/9,,Bills,Share,monthly,,Pay before due date.
+''');
+
+    expect(occasions, hasLength(2));
+    expect(occasions.first.module, 'Documents & renewals');
+    expect(occasions.first.repeat, 'none');
+    expect(occasions.first.actionUrl, 'https://example.com/passport');
+    expect(occasions[1].repeat, 'monthly');
+  });
+
+  test('admin reminders use action-style draft text', () {
+    const renewal = Occasion(
+      id: 'passport',
+      title: 'Passport renewal',
+      personName: '',
+      type: OccasionType.custom,
+      module: 'Documents & renewals',
+      month: 10,
+      day: 12,
+      channel: MessageChannel.share,
+      repeat: 'none',
+      notes: 'Check required documents.',
+    );
+
+    expect(MessageService().draft(renewal, MessageTone.warm), contains('Reminder: Passport renewal'));
   });
 
   test('exports backup JSON with default messages', () {

@@ -40,9 +40,11 @@ class CalendarService {
         'UID:${_escape(occasion.id)}@moments-remembered.local',
         'DTSTAMP:$stamp',
         'DTSTART;VALUE=DATE:$start',
-        'RRULE:FREQ=YEARLY',
+        if (occasion.repeat == 'yearly') 'RRULE:FREQ=YEARLY',
+        if (occasion.repeat == 'monthly') 'RRULE:FREQ=MONTHLY',
         'SUMMARY:${_escape(occasion.calendarTitle)}',
         if (occasion.notes.trim().isNotEmpty) 'DESCRIPTION:${_escape(occasion.notes.trim())}',
+        if (occasion.actionUrl.trim().isNotEmpty) 'URL:${_escape(occasion.actionUrl.trim())}',
         ...occasion.reminderDays.expand((days) => [
               'BEGIN:VALARM',
               'TRIGGER:${days == 0 ? 'PT9H' : '-P${days}D'}',

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#b11f4b">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E">
-  <title>Moments Remembered</title>
+  <title>TinyTools Life Admin</title>
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -112,7 +112,7 @@
 <body>
   <main class="shell">
     <header>
-      <div><h1>Moments Remembered</h1><p class="muted">Remember important moments. Prepare something thoughtful. Follow through on time.</p></div>
+      <div><h1>TinyTools Life Admin</h1><p class="muted">Remember occasions, renewals, bills, gifts, and life-admin deadlines without creating an account.</p></div>
       <div class="actions">
         <button class="secondary" id="import-data" type="button">Import data</button>
         <button class="secondary" id="export-data" type="button">Export data</button>
@@ -122,24 +122,29 @@
     </header>
 
     <details class="card" id="add-panel">
-      <summary>Add occasion</summary>
+      <summary>Add reminder</summary>
       <form id="occasion-form">
+        <label>Module<select id="module"><option>Occasions</option><option>Documents & renewals</option><option>Visa & admin</option><option>Home maintenance</option><option>Subscriptions & bills</option><option>Gift planning</option><option>Job search</option><option>Family care</option></select></label>
         <div class="grid">
-          <label>Occasion type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option></select></label>
-          <label>Date<input id="date" type="date" required></label>
+          <label>Type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option><option>Renewal</option><option>Bill</option><option>Task</option><option>Follow-up</option></select></label>
+          <label>Date or deadline<input id="date" type="date" required></label>
         </div>
-        <label>Occasion title<input id="title" value="Birthday" required maxlength="80"></label>
+        <label>Title<input id="title" value="Birthday" required maxlength="100"></label>
         <div class="grid">
           <label>Person or group (optional)<input id="person" placeholder="Maya, Mum and Dad, Team…" maxlength="80"></label>
-          <label>Relationship (optional)<input id="relationship" placeholder="Friend, sister, colleague…" maxlength="80"></label>
+          <label>Relationship/category (optional)<input id="relationship" placeholder="Friend, passport, home, subscription…" maxlength="80"></label>
         </div>
         <div class="grid">
           <label>Preferred channel<select id="channel"><option>Share</option><option>WhatsApp</option><option>LINE</option><option>SMS</option></select></label>
           <label>Phone number (optional)<input id="phone" type="tel" placeholder="+886..." maxlength="40"></label>
         </div>
-        <label>Personal note (optional)<textarea id="notes" placeholder="A memory or detail to mention"></textarea></label>
-        <label>Default message (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this occasion"></textarea></label>
-        <button class="primary" type="submit">Save occasion</button>
+        <div class="grid">
+          <label>Repeat<select id="repeat"><option value="yearly">Yearly</option><option value="monthly">Monthly</option><option value="none">One time</option></select></label>
+          <label>Action link (optional)<input id="action-url" type="url" placeholder="https://..." maxlength="240"></label>
+        </div>
+        <label>Note (optional)<textarea id="notes" placeholder="A memory, document detail, renewal note, or next action"></textarea></label>
+        <label>Default message/action text (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this item"></textarea></label>
+        <button class="primary" type="submit">Save reminder</button>
       </form>
     </details>
 
@@ -150,14 +155,15 @@
 
   <dialog id="message-dialog">
     <section class="card">
-      <h2>Prepare message</h2>
+      <h2>Prepare action</h2>
       <p class="muted">Edit every word. Nothing is sent automatically.</p>
-      <label>Your message<textarea id="message"></textarea></label>
+      <label>Message or action note<textarea id="message"></textarea></label>
       <div class="actions" style="margin-top:16px">
         <button class="primary" id="share-message" type="button">Share</button>
         <button class="secondary" id="whatsapp-message" type="button">WhatsApp</button>
         <button class="secondary" id="line-message" type="button">LINE</button>
         <button class="secondary" id="sms-message" type="button">SMS</button>
+        <button class="secondary" id="open-action" type="button">Open link</button>
         <button class="secondary" id="copy-message" type="button">Copy</button>
         <button class="secondary" id="close-message" type="button">Close</button>
       </div>
@@ -170,8 +176,10 @@
     let occasions = normalizeOccasions(JSON.parse(localStorage.getItem(key) || '[]'));
     let activeOccasion = null;
     const type = $('type');
-    const titles = { Birthday: 'Birthday', Anniversary: 'Anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion' };
+    const titles = { Birthday: 'Birthday', Anniversary: 'Wedding anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion', Renewal: 'Renewal', Bill: 'Bill due', Task: 'Task', 'Follow-up': 'Follow-up' };
+    const moduleType = { Occasions: 'Birthday', 'Documents & renewals': 'Renewal', 'Visa & admin': 'Renewal', 'Home maintenance': 'Task', 'Subscriptions & bills': 'Bill', 'Gift planning': 'Task', 'Job search': 'Follow-up', 'Family care': 'Task' };
     $('add-panel').open = !window.matchMedia('(max-width: 560px)').matches;
+    $('module').addEventListener('change', () => { type.value = moduleType[$('module').value] || 'Task'; type.dispatchEvent(new Event('change')); $('repeat').value = $('module').value === 'Subscriptions & bills' ? 'monthly' : $('module').value === 'Occasions' ? 'yearly' : 'none'; });
     type.addEventListener('change', () => { $('title').value = titles[type.value]; if (type.value === 'New Year') $('date').value = `${new Date().getFullYear()}-01-01`; });
 
     function nextDate(value) {
@@ -203,12 +211,20 @@
     }
     function normalizeOccasions(values) {
       const list = Array.isArray(values) ? values : values.occasions || [];
-      return list.filter(Boolean).map((item) => ({ id: item.id || crypto.randomUUID(), type: item.type || 'Birthday', title: item.title || item.type || 'Birthday', date: normalizeDate(item.date), person: item.person || item.personName || '', relationship: item.relationship || '', channel: item.channel || 'Share', phone: item.phone || item.phoneNumber || item.whatsapp || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' })).filter((item) => item.date);
+      return list.filter(Boolean).map((item) => {
+        const type = item.type || 'Birthday';
+        return { id: item.id || crypto.randomUUID(), module: item.module || item.category || inferModule(type), type, title: item.title || type, date: normalizeDate(item.date || item.deadline), person: item.person || item.personName || '', relationship: item.relationship || '', channel: item.channel || 'Share', phone: item.phone || item.phoneNumber || item.whatsapp || '', repeat: item.repeat || inferRepeat(type), actionUrl: item.actionUrl || item.action_url || item.url || '', notes: item.notes || '', defaultMessage: item.defaultMessage || item.default_message || '' };
+      }).filter((item) => item.date);
     }
+    function inferModule(type) { return ['Birthday', 'Anniversary', 'New Year', 'Holiday', 'Custom occasion'].includes(type) ? 'Occasions' : 'Life admin'; }
+    function inferRepeat(type) { return ['Birthday', 'Anniversary', 'New Year', 'Holiday'].includes(type) ? 'yearly' : 'none'; }
     function save() { localStorage.setItem(key, JSON.stringify(occasions)); render(); }
     function setStatus(message) { $('status').textContent = message; }
     function draft(item) {
       if (item.defaultMessage && item.defaultMessage.trim()) return item.defaultMessage.trim();
+      if (item.module && item.module !== 'Occasions') {
+        return `Reminder: ${item.title}${item.person ? ` for ${item.person}` : ''} is coming up on ${nextDate(item.date).toLocaleDateString()}.${item.notes ? ` ${item.notes}` : ''}`;
+      }
       const first = item.person.trim().split(/\s+/)[0];
       const recipient = first ? `, ${first}` : '';
       const greeting = item.type === 'Birthday' ? `Happy birthday${recipient}` : item.type === 'Anniversary' ? `Happy anniversary${recipient}` : item.type === 'New Year' ? `Happy New Year${recipient}` : item.type === 'Holiday' ? `Warm wishes for ${item.title}${recipient}` : `Thinking of you for ${item.title}${recipient}`;
@@ -221,13 +237,13 @@
       $('export-data').disabled = occasions.length === 0;
       $('occasions').innerHTML = occasions.length ? occasions.map((item) => {
         const date = nextDate(item.date), month = date.toLocaleString(undefined, { month: 'short' }), days = Math.round((date - new Date(new Date().setHours(0,0,0,0))) / 86400000);
-        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · ${escapeHtml(item.channel || 'Share')}${item.defaultMessage ? ' · Default message saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare message</button></div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
+        return `<article class="card occasion"><div class="date">${date.getDate()}<small>${month}</small></div><div><h3>${escapeHtml(item.title)}${item.person ? ` — ${escapeHtml(item.person)}` : ''}</h3><p class="muted">${escapeHtml(item.module || 'Occasions')} · ${escapeHtml(item.type)} · ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · ${escapeHtml(item.channel || 'Share')}${item.defaultMessage ? ' · Default text saved' : ''}</p><div class="actions" style="margin-top:10px"><button class="secondary prepare" data-id="${item.id}" type="button">Prepare</button>${item.actionUrl ? `<a class="secondary" href="${escapeHtml(item.actionUrl)}" target="_blank" rel="noopener">Open link</a>` : ''}</div></div><button class="danger remove" data-id="${item.id}" type="button">Remove</button></article>`;
       }).join('') : '<div class="card empty"><h3>No occasions yet</h3><p class="muted">Add a birthday, anniversary, holiday, or custom moment above.</p></div>';
     }
     $('occasion-form').addEventListener('submit', (event) => {
       event.preventDefault();
-      occasions.push({ id: crypto.randomUUID(), type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), channel: $('channel').value, phone: $('phone').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
-      save(); event.target.reset(); type.value = 'Birthday'; $('title').value = 'Birthday'; if (window.matchMedia('(max-width: 560px)').matches) $('add-panel').open = false; setStatus('Occasion saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
+      occasions.push({ id: crypto.randomUUID(), module: $('module').value, type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), channel: $('channel').value, phone: $('phone').value.trim(), repeat: $('repeat').value, actionUrl: $('action-url').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
+      save(); event.target.reset(); $('module').value = 'Occasions'; type.value = 'Birthday'; $('repeat').value = 'yearly'; $('title').value = 'Birthday'; if (window.matchMedia('(max-width: 560px)').matches) $('add-panel').open = false; setStatus('Reminder saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
     });
     $('occasions').addEventListener('click', (event) => {
       const id = event.target.dataset.id; if (!id) return;
@@ -245,6 +261,7 @@
       openUrl(phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`);
     });
     $('line-message').addEventListener('click', () => openUrl(`https://line.me/R/share?text=${encodeURIComponent(messageText())}`));
+    $('open-action').addEventListener('click', () => { if (activeOccasion?.actionUrl) openUrl(activeOccasion.actionUrl); else setStatus('No action link saved for this item.'); });
     $('sms-message').addEventListener('click', () => {
       const phone = cleanPhone(activeOccasion?.phone), text = encodeURIComponent(messageText());
       window.location.href = `sms:${phone}${navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad') ? '&' : '?'}body=${text}`;
@@ -295,8 +312,8 @@
       const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
       const alarm = (trigger, summary) => ['BEGIN:VALARM',`TRIGGER:${trigger}`,'ACTION:DISPLAY',`DESCRIPTION:${esc(summary)}`,'END:VALARM'];
       const events = occasions.map((item) => {
-        const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`;
-        return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`,'RRULE:FREQ=YEARLY',`SUMMARY:${esc(summary)}`,...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].join('\r\n');
+        const date = nextDate(item.date), start = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`, summary = `${item.title}${item.person ? ` — ${item.person}` : ''}`, repeat = item.repeat || inferRepeat(item.type);
+        return ['BEGIN:VEVENT',`UID:${item.id}@moments-remembered.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${start}`, repeat === 'yearly' ? 'RRULE:FREQ=YEARLY' : repeat === 'monthly' ? 'RRULE:FREQ=MONTHLY' : '',`SUMMARY:${esc(summary)}`, item.notes ? `DESCRIPTION:${esc(item.notes)}` : '', item.actionUrl ? `URL:${esc(item.actionUrl)}` : '', ...alarm('-P7D', summary),...alarm('-P1D', summary),...alarm('PT9H', summary),'END:VEVENT'].filter(Boolean).join('\r\n');
       }).join('\r\n');
       const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Moments Remembered//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR\r\n`;
       downloadFile('moments-remembered.ics', 'text/calendar', content);

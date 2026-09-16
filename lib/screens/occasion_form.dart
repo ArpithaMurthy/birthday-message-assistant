@@ -17,9 +17,22 @@ class _OccasionFormState extends State<OccasionForm> {
   final _phone = TextEditingController();
   final _notes = TextEditingController();
   final _defaultMessage = TextEditingController();
+  final _actionUrl = TextEditingController();
   DateTime _date = DateTime(DateTime.now().year, 1, 1);
+  String _module = 'Occasions';
+  String _repeat = 'yearly';
   OccasionType _type = OccasionType.birthday;
   MessageChannel _channel = MessageChannel.share;
+  static const _moduleDefaults = {
+    'Occasions': OccasionType.birthday,
+    'Documents & renewals': OccasionType.custom,
+    'Visa & admin': OccasionType.custom,
+    'Home maintenance': OccasionType.custom,
+    'Subscriptions & bills': OccasionType.custom,
+    'Gift planning': OccasionType.custom,
+    'Job search': OccasionType.custom,
+    'Family care': OccasionType.custom,
+  };
 
   @override
   void dispose() {
@@ -29,6 +42,7 @@ class _OccasionFormState extends State<OccasionForm> {
     _phone.dispose();
     _notes.dispose();
     _defaultMessage.dispose();
+    _actionUrl.dispose();
     super.dispose();
   }
 
@@ -55,6 +69,21 @@ class _OccasionFormState extends State<OccasionForm> {
     });
   }
 
+  void _changeModule(String? module) {
+    if (module == null) return;
+    final defaultType = _moduleDefaults[module] ?? OccasionType.custom;
+    setState(() {
+      _module = module;
+      _type = defaultType;
+      _title.text = defaultType == OccasionType.custom ? module : defaultType.defaultTitle;
+      _repeat = module == 'Subscriptions & bills'
+          ? 'monthly'
+          : module == 'Occasions'
+              ? 'yearly'
+              : 'none';
+    });
+  }
+
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(
@@ -66,10 +95,13 @@ class _OccasionFormState extends State<OccasionForm> {
         type: _type,
         month: _date.month,
         day: _date.day,
+        module: _module,
         relationship: _relationship.text.trim(),
         phoneNumber: _phone.text.trim(),
         notes: _notes.text.trim(),
         defaultMessage: _defaultMessage.text.trim(),
+        repeat: _repeat,
+        actionUrl: _actionUrl.text.trim(),
         channel: _channel,
       ),
     );
@@ -87,9 +119,17 @@ class _OccasionFormState extends State<OccasionForm> {
             children: [
               Text('What do you want to remember?', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                initialValue: _module,
+                decoration: const InputDecoration(labelText: 'Module', prefixIcon: Icon(Icons.dashboard_customize_outlined)),
+                items: _moduleDefaults.keys.map((module) => DropdownMenuItem(value: module, child: Text(module))).toList(),
+                onChanged: _changeModule,
+              ),
+              const SizedBox(height: 14),
               DropdownButtonFormField<OccasionType>(
+                key: ValueKey(_type),
                 initialValue: _type,
-                decoration: const InputDecoration(labelText: 'Occasion type', prefixIcon: Icon(Icons.event_outlined)),
+                decoration: const InputDecoration(labelText: 'Type', prefixIcon: Icon(Icons.event_outlined)),
                 items: OccasionType.values.map((type) => DropdownMenuItem(value: type, child: Text(type.label))).toList(),
                 onChanged: _changeType,
               ),
@@ -107,7 +147,7 @@ class _OccasionFormState extends State<OccasionForm> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _relationship,
-                decoration: const InputDecoration(labelText: 'Relationship (optional)', hintText: 'Friend, sister, colleague…', prefixIcon: Icon(Icons.favorite_border)),
+                decoration: const InputDecoration(labelText: 'Relationship/category (optional)', hintText: 'Friend, passport, home, subscription…', prefixIcon: Icon(Icons.favorite_border)),
               ),
               const SizedBox(height: 14),
               ListTile(
@@ -131,6 +171,24 @@ class _OccasionFormState extends State<OccasionForm> {
                 controller: _phone,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(labelText: 'Phone number (optional)', hintText: 'Include country code for WhatsApp', prefixIcon: Icon(Icons.phone_outlined)),
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                key: ValueKey(_repeat),
+                initialValue: _repeat,
+                decoration: const InputDecoration(labelText: 'Repeat', prefixIcon: Icon(Icons.repeat_outlined)),
+                items: const [
+                  DropdownMenuItem(value: 'yearly', child: Text('Yearly')),
+                  DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                  DropdownMenuItem(value: 'none', child: Text('One time')),
+                ],
+                onChanged: (value) => setState(() => _repeat = value ?? 'none'),
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _actionUrl,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(labelText: 'Action link (optional)', hintText: 'https://...', prefixIcon: Icon(Icons.link_outlined)),
               ),
               const SizedBox(height: 14),
               TextFormField(

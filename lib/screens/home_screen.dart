@@ -244,7 +244,7 @@ class _OccasionCard extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(occasion.calendarTitle, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 3),
-                  Text('${occasion.type.label}${occasion.relationship.isEmpty ? '' : ' · ${occasion.relationship}'} · ${DateFormat('d MMM').format(occurrence)} · ${occasion.channel.label}'),
+                  Text('${occasion.module} · ${occasion.type.label}${occasion.relationship.isEmpty ? '' : ' · ${occasion.relationship}'} · ${DateFormat('d MMM').format(occurrence)} · ${occasion.channel.label}'),
                 const SizedBox(height: 6),
                 Text(handled ? 'Handled for ${occurrence.year}' : timing, style: TextStyle(color: handled ? Colors.green.shade700 : Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
               ]),
