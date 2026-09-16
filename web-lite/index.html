@@ -76,6 +76,12 @@
     h1 { margin-bottom: 6px; font-size: clamp(1.75rem, 8vw, 2.5rem); letter-spacing: -0.04em; }
     .muted { color: var(--cp-text-muted); }
     .card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 20px; box-shadow: var(--cp-shadow); }
+    details.card { padding: 0; overflow: hidden; }
+    details.card summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer; font-weight: 700; }
+    details.card summary::-webkit-details-marker { display: none; }
+    details.card summary::after { content: "＋"; color: var(--cp-accent); font-size: 1.25rem; }
+    details.card[open] summary::after { content: "−"; }
+    details.card form { padding: 0 20px 20px; }
     form { display: grid; gap: 14px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     label { display: grid; gap: 6px; font-size: 0.875rem; color: var(--cp-text-muted); }
@@ -115,7 +121,8 @@
       <input id="import-file" type="file" accept=".json,.csv,application/json,text/csv" hidden>
     </header>
 
-    <section class="card">
+    <details class="card" id="add-panel">
+      <summary>Add occasion</summary>
       <form id="occasion-form">
         <div class="grid">
           <label>Occasion type<select id="type"><option>Birthday</option><option>Anniversary</option><option>New Year</option><option>Holiday</option><option>Custom occasion</option></select></label>
@@ -134,7 +141,7 @@
         <label>Default message (optional)<textarea id="default-message" placeholder="Use this exact draft whenever you prepare this occasion"></textarea></label>
         <button class="primary" type="submit">Save occasion</button>
       </form>
-    </section>
+    </details>
 
     <div class="section-head"><h2>Coming up</h2><span class="muted" id="count"></span></div>
     <section id="occasions"></section>
@@ -164,6 +171,7 @@
     let activeOccasion = null;
     const type = $('type');
     const titles = { Birthday: 'Birthday', Anniversary: 'Anniversary', 'New Year': 'New Year', Holiday: 'Holiday', 'Custom occasion': 'Important occasion' };
+    $('add-panel').open = !window.matchMedia('(max-width: 560px)').matches;
     type.addEventListener('change', () => { $('title').value = titles[type.value]; if (type.value === 'New Year') $('date').value = `${new Date().getFullYear()}-01-01`; });
 
     function nextDate(value) {
@@ -219,7 +227,7 @@
     $('occasion-form').addEventListener('submit', (event) => {
       event.preventDefault();
       occasions.push({ id: crypto.randomUUID(), type: type.value, title: $('title').value.trim(), date: $('date').value, person: $('person').value.trim(), relationship: $('relationship').value.trim(), channel: $('channel').value, phone: $('phone').value.trim(), notes: $('notes').value.trim(), defaultMessage: $('default-message').value.trim() });
-      save(); event.target.reset(); type.value = 'Birthday'; $('title').value = 'Birthday'; setStatus('Occasion saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
+      save(); event.target.reset(); type.value = 'Birthday'; $('title').value = 'Birthday'; if (window.matchMedia('(max-width: 560px)').matches) $('add-panel').open = false; setStatus('Occasion saved in this browser. Next: export the calendar and import it into your calendar app to receive reminders.');
     });
     $('occasions').addEventListener('click', (event) => {
       const id = event.target.dataset.id; if (!id) return;
