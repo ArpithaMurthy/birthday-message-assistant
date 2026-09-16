@@ -144,6 +144,27 @@ There is still no server account, hosting, analytics SDK, contact upload, or aut
 
 GitHub Actions runs **Mobile CI** on mobile changes: `flutter analyze`, `flutter test`, and `flutter build apk --debug`. The debug APK is uploaded as an artifact named `moments-remembered-debug-apk`, which is useful for private friend testing before spending money on store publication.
 
+## TinyTools launch workflow
+
+Use `scripts/launch_agent.py` to prepare validation posts without storing social-media credentials or auto-posting blindly.
+
+```powershell
+python scripts\launch_agent.py --channel all
+python scripts\launch_agent.py --channel x --open
+python scripts\launch_agent.py --channel reddit_sideproject --open
+python scripts\launch_agent.py --mark-posted x
+```
+
+The helper writes drafts to `launch_outbox/` and can open X/Reddit/Indie Hackers composer pages. You still review and press Post manually. `launch_outbox/` is gitignored because it is working state, not product code.
+
+Recommended channels for first validation:
+
+1. X from your existing account if it already has relevant followers.
+2. Reddit with a separate TinyTools account; follow each subreddit self-promotion rules.
+3. Indie Hackers with a TinyTools/your-name profile.
+
+Instagram is secondary: useful later for a short visual demo or carousel, but weaker for early product feedback than X, Reddit, and Indie Hackers.
+
 ## Optional Web Lite container
 
 Docker provides a repeatable local server for `web-lite/`, but is not needed for Flutter development and cannot provide native mobile notifications:
